@@ -1,0 +1,118 @@
+def appMainClass = 'fd.ng.cmdtools.CmdToolsMain'
+
+// 以下两行，是另外一种打包方式
+// 执行命令：gradle build， 在build/distributions目录下会生成两个压缩包，里面包含bin启动脚本和依赖jar包
+apply plugin: 'application'
+mainClassName = appMainClass
+
+dependencies {
+    compile project(':core')
+    compile project(':database')
+    compile group: 'com.google.guava', name: 'guava', version: '25.1-jre'
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.13.1'
+    compile group: 'org.freemarker', name: 'freemarker', version: '2.3.28'
+    compile group: 'com.squareup.okio', name: 'okio', version: '2.2.2'
+    compile "commons-codec:commons-codec:1.11"
+
+    testCompile group: 'com.oracle', name: 'ojdbc6', version: '11.2.0.4.0-atlassian-hosted'
+}
+
+jar {
+    archivesBaseName = 'fdcmdtools'
+
+    String classpaths = 'resources/' // 存放依赖包的信息
+    configurations.runtime.each {
+        classpaths = classpaths + " lib/"+it.name
+    }
+    configurations.testRuntime.each {
+        if(it.name.contains("mysql")||it.name.contains("postgresql") ||it.name.contains("ojdbc"))
+            classpaths = classpaths + " lib/"+it.name
+    }
+//    classpaths = classpaths + " lib/ojdbc6.jar"
+
+    manifest {
+        attributes(
+                'Main-Class': appMainClass,
+                'Class-Path': classpaths,
+                "Implementation-Title": archivesBaseName,
+                "Implementation-Version": project.version,
+                'Built-By': System.getProperty('user.name'),
+                'Built-JDK': System.getProperty('java.version'),
+                'Source-Compatibility': project.sourceCompatibility,
+                'Target-Compatibility': project.targetCompatibility,
+                "Build-Time": new Date().format("yyyy-MM-dd HH:mm:ssZ")
+        )
+    }
+
+//    from('src/main/java') {
+//        // 把模版文件一起打包
+//        include '**/*.ftl'
+//    }
+}
+
+//sourceSets {
+//    main {
+//        resources {
+//            // 开发阶段，Idea编译程序时，会将java目录下的所有非.java文件编译(拷贝)到production\resources下
+//            // 目的是解决开发阶段，让程序能够找到需要的文件，比如xml文件、ftl文件等等
+//            // 同时达到gradle打包成jar包时，这些文件也会被打包进去。而且不需要在jar中写from...include了
+//            // 如果打包时还要包括resources下的文件，需改为： srcDirs = ['src/main/java', 'src/main/resources']
+//            srcDir 'src/main/java'
+//        }
+//    }
+//}
+
+processResources {
+    exclude { "**/*.*" }
+}
+
+def createDir = {
+    path->
+        File dir=new File(path)
+        if (!dir.exists()){
+            dir.mkdirs()
+        }
+}
+def releaseLibDir = "$buildDir/libs/lib"
+
+task clearJar(type: Delete) {
+    delete releaseLibDir
+//    followSymlinks = true
+}
+task cpJars(type:Sync) {
+    from(configurations.runtime)
+    from(configurations.testRuntime){
+        include("mysql*", "*postgresql*", "*ojdbc*")
+    }
+    into(releaseLibDir)
+}
+//task cpRuntimeJars(type:Copy) {
+//    from(configurations.runtime)
+//    into(releaseLibDir)
+//}
+//task cpOtherJars(type:Copy) {
+//    from(configurations.testRuntime)
+//    include("mysql*", "*postgresql*")
+//    into(releaseLibDir)
+//}
+task copyFtl(type:Sync){
+    createDir("$buildDir/libs/template")
+    from "src\\main\\java\\fd\\ng\\cmdtools\\codegen\\template"
+    into "$buildDir/libs/template"
+}
+task copyResource(type:Sync){
+    // 为了方便对发布的程序修改配置文件，resources没有打包到jar里面
+    // 所以这里自动复制一份到发布目录下，作为初始的样板文件
+    sourceSets.test.resources.srcDirs.each {
+        from it
+        into "$buildDir/libs/resources"
+    }
+}
+// 执行： gradle release 完成打包发布即可。之后，可以把 cmdtools\build\libs 整个拿走到处使用，使用方式为：
+// 1） 修改这个目录下的 fdconfig/dbinfo.conf 中的DB连接。如果不需要通过表来生成实体，则跳过本步骤
+// 2） 在该目录下执行： java -jar fdcmdtools-2.0.jar codegen codedir=生成代码的目录 basepkg=项目包前缀名(如：hmfms) ftldir=.\template -E
+task release(dependsOn: [build, cpJars, copyFtl, copyResource]) {
+    println("使用方式：")
+    println("cd D:\\java\\app\\intellij2018\\feedwork\\cmdtools\\build\\libs")
+    println("java -jar fdcmdtools-2.0.jar codegen codedir=/java/app/intellij2018/example/A basepkg=test.yyy ftldir=.\\template -E")
+}

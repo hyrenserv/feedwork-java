@@ -1,0 +1,171 @@
+// 定义全局变量。各子模块使用 rootProject.ext 引用
+ext {
+    currentDateTime = new Date().format("yyyy-MM-dd HH:mm:ssZ")
+    releaseVersion  = "190703" //new Date().format("yyMMdd")
+}
+
+allprojects {
+    group 'fd.ng'
+    version rootProject.ext.releaseVersion
+}
+subprojects {
+    apply plugin: 'java'
+
+//    archivesBaseName = 'fd'
+
+    compileJava {
+        sourceCompatibility = 1.8  // can be switched to 10 for testing
+        targetCompatibility = 1.8
+        options.encoding = 'UTF-8'
+        options.compilerArgs += "-parameters"
+    }
+
+    compileTestJava {
+        sourceCompatibility = 1.8  // can be switched to 10 for testing
+        targetCompatibility = 1.8
+        options.encoding = 'UTF-8'
+        options.compilerArgs += "-parameters"
+    }
+
+    repositories {
+        mavenLocal()
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+    }
+
+//    configurations.all() {
+//        Configuration configuration ->
+//            //当遇到版本冲突时直接构建失败
+//            configuration.resolutionStrategy.failOnVersionConflict()
+//    }
+
+//    configurations {
+//        // 所有需要忽略的包定义在此
+//        all*.exclude group: 'commons-logging', module: 'commons-logging' // common-logging
+//        all*.exclude group: 'log4j', module: 'log4j' // log4j
+//        all*.exclude group: 'ch.qos.logback', module: 'logback-core' // logback
+//        all*.exclude group: 'ch.qos.logback', module: 'logback-classic' // slf4j -> logback
+//        all*.exclude group: 'org.slf4j', module: 'slf4j-jdk14' // slf4j -> jdk-logging
+//        all*.exclude group: 'org.slf4j', module: 'slf4j-jcl' // slf4j -> common-logging
+//        all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12' // slf4j -> log4j
+
+        //当遇到版本冲突时直接构建失败
+//        Configuration configuration ->
+//            configuration.resolutionStrategy.failOnVersionConflict()
+            
+//    }
+
+    dependencies {
+        compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+        compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
+        compile group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.25'
+        compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
+        compile group: 'org.slf4j', name: 'log4j-over-slf4j', version: '1.7.25'
+        compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
+        compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.2'
+        compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
+
+        testCompile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
+        testCompile "commons-lang:commons-lang:2.6"
+        testCompile "commons-codec:commons-codec:1.11"
+        testCompile "org.apache.commons:commons-crypto:1.0.0"
+        testCompile "org.apache.commons:commons-lang3:3.8.1"
+        testCompile "commons-io:commons-io:2.6"
+        testCompile "commons-beanutils:commons-beanutils:1.9.3"
+//        testCompile "org.apache.commons:commons-collections4:4.1"
+        testCompile group: 'junit', name: 'junit', version: '4.12'
+        testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
+        testCompile group: 'org.easymock', name: 'easymock', version: '4.0.2'
+        testCompile group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
+        testCompile group: 'mysql', name: 'mysql-connector-java', version: '5.1.47'
+        testCompile project(':testing')
+        compile group: 'com.univocity', name: 'univocity-parsers', version: '2.8.2'
+    }
+
+    def moduleRootPackagePrefix = "$project.group.$project.name"
+    // 显示当前项目下所有用于 compile 的 jar.
+    task traceinfo(description: 'Display all compile jars.') {
+        doFirst {
+            println("Project : $project.name, $project.group")
+        }
+        doLast {
+            println("Project : $moduleRootPackagePrefix")
+        }
+    }
+
+    // 仅仅用于在做feedwork开发测试时，把jar包拷贝到另外的测试工程中
+    task copyJars(type: Copy, dependsOn: [jar]) {
+        def toRootDir = "D:\\java\\app\\intellij2018\\example\\libs"
+        if( project.name=="testing" ) {
+            println "copy jars from [$project.name] to testcase"
+            from "${buildDir}/libs"
+            include 'fd*.jar'
+            into toRootDir + "\\testcase"
+//            from configurations.compile
+        } else if( project.name.startsWith("example")||project.name=="cmdtools" ) {
+            println("Skip subproject : $project.name")
+        } else {
+            println "copy jars from [$project.name] to runtime"
+            from "${buildDir}/libs"
+            include 'fd*.jar'
+            into toRootDir + "\\runtime"
+//            from configurations.compile
+        }
+    }
+}
+
+// 定义默认task. 执行gradle不指定指定task，则默认执行这里定义的任务。可以逗号分隔定于多个
+defaultTasks 'tips'
+task tips {
+    doFirst {
+        println("run default Task : tips.")
+        if(System.getProperty('my.name')!=null) {                    // 执行 gradle -Duname=xxx 将得到'name'的属性值
+            println("hello : " + System.properties['my.name'])
+        }
+        if (project.hasProperty('age')) {                   // 执行 gradle -Dname=xxx -Page=33 将得到'age'的属性值
+            println("project property age=" + project.property('age'))
+        }
+    }
+}
+
+//  configure 属性块可以根据条件对各个工程进行特定处理。例如以下为对所有'tomcat'开头的子工程提供了：特定插件、依赖、'subTask'处理方法。
+configure(subprojects.findAll { it.name.startsWith('tomcat') }) {
+    apply plugin: 'war'
+    dependencies {
+        // ......
+    }
+    subTask << {
+        configurations.compile.each { File file -> println file.name }
+    }
+}
+// 单独设置某个子工程：使用'project'
+project(':testing') {
+    task forProject1 {
+        doFirst {
+            println 'testing'
+        }
+    }
+}
+
+// 复制文件
+//task copyFiles(type: Copy) {
+//    doLast {
+//        // 复制 src/main/webapp 目录下的所有文件
+//        from 'src/main/webapp'
+//        // 复制一个单独文件
+//        from 'src/staging/index.html'
+//        // 复制一个任务输出的文件
+//        from copyTask
+//        // 显式使用任务的 outputs 属性复制任务的输出文件
+//        from copyTaskWithPatterns.outputs
+//        // 复制一个 ZIP 压缩文件的内容
+//        from zipTree('src/main/assets.zip')
+//        // 最后指定目标目录
+//        into { getDestDir() }
+//    }
+//}
+
+// 自定义Task
+
+// 当项目中自定义Task类型比较多时，可以将自定义Task写在buildSrc项目中：
+// 在项目的根目录下新建一个名为buildSrc文件夹
+// 然后依次新建子目录src/main/groovy，然后建自己的包和类

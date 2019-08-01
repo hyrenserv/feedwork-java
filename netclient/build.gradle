@@ -1,0 +1,21 @@
+dependencies {
+    compile project(':core')
+    // 3.13 minimum requirements to Java 8+, use 3.12 on Java 7+
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.13.1'
+}
+
+jar {
+    archivesBaseName = 'fd-netclient'
+
+    manifest {
+        attributes(
+                "Implementation-Title": archivesBaseName,
+                "Implementation-Version": project.version,
+                'Built-By': System.getProperty('user.name'),
+                'Built-JDK': System.getProperty('java.version'),
+                'Source-Compatibility': project.sourceCompatibility,
+                'Target-Compatibility': project.targetCompatibility,
+                "Build-Time": rootProject.ext.currentDateTime
+        )
+    }
+}

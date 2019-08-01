@@ -1,0 +1,62 @@
+thisconf.debug.showme:  true   # 是否把全部配置信息打印到日志
+
+onestring1:  sdf lkj   # 有无双引号的测试
+
+onestring2:  "  sdf # lkj  "   # 是否把全部配置信息打印到日志
+
+onestring3:    ""                # 空串
+
+onestring4:    src\test\main                # 路径符号测试
+
+onestring5  :  55555
+onestring6  =  666666
+
+onestring7  :
+  xxx =  sdfdf 55555
+  yyy =  "  sdfdf 55555    "
+
+onestring8  :
+  -             one
+  -    2
+  -             1111111
+  - false
+  -          "  # "
+#linekey = 234
+# global 中填写全局通用的配置参数，这些参数会被继承到下面的每一组数据库连接配置中
+global:
+  fetch_size:       200
+  max_result_rows:  -1        # 结果集最大允许多少条。-1为不受限制
+  show_conn_time:   no        # 是否显示数据连接的时间消耗
+  show_sql_time:    yes       # 是否显示sql执行时间
+  longtime_sql:     10000     # 10秒。SQL执行时间超过这个值的，显示到日志中
+
+# 每组配置使用 name 进行区别。在程序中，通过 name 获取不同的数据库连接
+databases:
+  -
+    name:             default
+    way:              JDBC       # 来自枚举 ConnWay
+    dbtype:           MYSQL      # 来自枚举 Dbtype
+    driver:           "com.mysql.jdbc.Driver"
+    url:              "jdbc:mysql://localhost:3306/xxx"
+    username:         root
+    password:         "xxx123"
+    fetch_size:       100
+    max_result_rows:  50
+    show_conn_time:   yes
+    show_sql_time:    yes
+    longtime_sql:     2000
+  -
+    name:        hrsdb
+    way:         POOL
+    dbtype:      ORACLE
+    driver:      "com.Oracle.jdbc.Driver"
+    url:         "jdbc:thin://192.168.56.101:3306/kafkalogs"
+    username:    root
+    password:    a12345
+
+pMap:
+  map1:
+    xxx: lkjsdf
+    yyy: 8989
+  map2:
+    zzz: lll

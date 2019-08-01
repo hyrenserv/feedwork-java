@@ -1,0 +1,22 @@
+dependencies {
+    compile project(":core")
+    compile project(":database")
+    compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.19.v20190610'
+    compile group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.4.19.v20190610'
+}
+
+jar {
+    archivesBaseName = 'fd-netserver'
+
+    manifest {
+        attributes(
+                "Implementation-Title": archivesBaseName,
+                "Implementation-Version": project.version,
+                'Built-By': System.getProperty('user.name'),
+                'Built-JDK': System.getProperty('java.version'),
+                'Source-Compatibility': project.sourceCompatibility,
+                'Target-Compatibility': project.targetCompatibility,
+                "Build-Time": rootProject.ext.currentDateTime
+        )
+    }
+}

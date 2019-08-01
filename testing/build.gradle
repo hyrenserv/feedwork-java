@@ -1,0 +1,27 @@
+dependencies {
+    compile project(':core')
+    compile project(':web')
+    compile project(':database')
+    compile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.4.14.v20181114'
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.13.1'
+
+    testCompile 'com.google.guava:guava:25.1-jre'
+    testCompile 'com.google.protobuf:protobuf-java:3.5.1'
+}
+
+jar {
+    archivesBaseName = 'fd-testing'
+
+    manifest {
+        attributes(
+                "Implementation-Title": archivesBaseName,
+                "Implementation-Version": project.version,
+                'Built-By': System.getProperty('user.name'),
+                'Built-JDK': System.getProperty('java.version'),
+                'Source-Compatibility': project.sourceCompatibility,
+                'Target-Compatibility': project.targetCompatibility,
+                "Build-Time": rootProject.ext.currentDateTime
+        )
+    }
+}

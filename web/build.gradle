@@ -1,0 +1,26 @@
+dependencies {
+    compile project(":core")
+    compile project(":database")
+    compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+
+    testCompile project(":netclient")
+    testCompile project(":netserver")
+//    testCompile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.13.1'
+}
+
+jar {
+    archivesBaseName = 'fd-web'
+
+    manifest {
+        attributes(
+                "Implementation-Title": archivesBaseName,
+                "Implementation-Version": project.version,
+                'Built-By': System.getProperty('user.name'),
+                'Built-JDK': System.getProperty('java.version'),
+                'Source-Compatibility': project.sourceCompatibility,
+                'Target-Compatibility': project.targetCompatibility,
+                "Build-Time": rootProject.ext.currentDateTime
+        )
+    }
+}
+

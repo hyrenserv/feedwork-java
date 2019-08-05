@@ -9,11 +9,11 @@
 ### 1.1 编写 Action 类
 
 - 方式一：继承 AbstractWebappBaseAction  
-  每个项目首先编写自己用的 Action 父类，并继承自 AbstractWebappBaseAction;  
-  重新 _doPreProcess 和 _doPostProcess 两个方法，这两个方法在每个Action函数执行前、后被自动调用。一般情况，pre中做session验证，_doPostProcess做清理操作。AbstractWebappBaseAction的_doPostProcess默认完成了DB清理工作。  
+每个项目首先编写自己用的 Action 父类，并继承自 AbstractWebappBaseAction;  
+重新 _doPreProcess 和 _doPostProcess 两个方法，这两个方法在每个Action函数执行前、后被自动调用。一般情况，pre中做session验证，_doPostProcess做清理操作。AbstractWebappBaseAction的_doPostProcess默认完成了DB清理工作。  
 
 - 方式二：使用 @Action 注解  
-  如果一个包下面有多个Action类，那么需要给 @Action 注解设置 UriExt 值，该值会追加到包名路径的最后。
+如果一个包下面有多个Action类，那么需要给 @Action 注解设置 UriExt 值，该值会追加到包名路径的最后。
 
 - 附加说明  
 web请求的映射规则为：使用Action类的包名+方法名，作为URL访问路径。 即：   
@@ -22,16 +22,12 @@ web请求的映射规则为：使用Action类的包名+方法名，作为URL访�
 
 ### 1.2 编写 Action 方法
 
-按照普通的Java方法编写程序即可，不需要有任何与WEB程序相关的处理代码。
-如果方法内部必须直接操作request等对象，可通过RequestUtil工具类获取。
-所有 public 非 static 的方法，被作为web请求的响应方法。
-
-如果有同名方法，需要使用 UrlName 注解为其设置别名。
-
-使用 SqlOperator 可以直接操作数据库，不需要 try...catch
-
-代码中如果需要中断方法执行并返回错误信息给前端，可以直接抛出 BusinessException 异常
-
+按照普通的Java方法编写程序即可，不需要有任何与WEB程序相关的处理代码。  
+如果方法内部必须直接操作request等对象，可通过RequestUtil工具类获取。  
+所有 public 非 static 的方法，被作为web请求的响应方法。  
+如果有同名方法，需要使用 UrlName 注解为其设置别名。  
+使用 SqlOperator 可以直接操作数据库，不需要 try...catch  
+代码中如果需要中断方法执行并返回错误信息给前端，可以直接抛出 BusinessException 异常  
 分页查询，需创建分页对象并使用相应的分页查询方法，例如：
 ```
 public Map<String, Object> getPagedUserResult(int currPage, int pageSize) {
@@ -47,13 +43,13 @@ public Map<String, Object> getPagedUserResult(int currPage, int pageSize) {
 
 ### 1.3 Action 方法参数
 
-可以是任意名字的参数，如果名字和前端提交的数据名字一致则自动取值，如果不一致，可以使用 @RequestParam 注解。
-如果参数是一个JavaBean，可以使用 @RequestBean 注解，或者继承自 FeedBean。
+可以是任意名字的参数，如果名字和前端提交的数据名字一致则自动取值，如果不一致，可以使用 @RequestParam 注解。  
+如果参数是一个JavaBean，可以使用 @RequestBean 注解，或者继承自 FeedBean。  
 
 ### 1.4 Action 返回值
 
-返回值可以是任意对象。
-前端得到JSON串，格式为：{ code: 200, message: "OK", data: 方法的返回值对象 }
+返回值可以是任意对象。  
+前端得到JSON串，格式为：{ code: 200, message: "OK", data: 方法的返回值对象 }  
 
 ## 2. 测试用例
 
@@ -61,8 +57,8 @@ public Map<String, Object> getPagedUserResult(int currPage, int pageSize) {
 
 ### 2.1 针对每个Action方法编写对应的测试用例
 
-引入 fd-testing 包，继承 WebBaseTestCase，使用 Action 方法相同名字来命名的测试方法。
-把test中的 netclientinfo.conf 配置文件中的 connectTimeout, readTimeout, writeTimeout 设置成250，以免单步跟踪时出现超时
+引入 fd-testing 包，继承 WebBaseTestCase，使用 Action 方法相同名字来命名的测试方法。  
+把test中的 netclientinfo.conf 配置文件中的 connectTimeout, readTimeout, writeTimeout 设置成250，以免单步跟踪时出现超时  
 
 例如，有 Action 方法如下：
 ```
@@ -93,14 +89,14 @@ public void addUser() {
         .addData("password", "admin")
         .post("......");
 ```
-如上代码，增加 buildSession() 方法即可在测试用例中获得 session
+如上代码，增加 buildSession() 方法即可在测试用例中获得 session  
 
 - 对测试类使用 FixMethodOrder(MethodSorters.NAME_ASCENDING) 注解
 - 所有被测试方法按照ASCII顺序编号
 - 保证登陆认证的方法是顺序最小的
 
-以上处理方式，是仅登陆一次，然后所有测试方法都可执行。
-也可以对登陆方法设置 Before 注解，这样会导致每个测试方式执行时，都会先登陆一次。
+以上处理方式，是仅登陆一次，然后所有测试方法都可执行。  
+也可以对登陆方法设置 Before 注解，这样会导致每个测试方式执行时，都会先登陆一次。  
 
 ### 2.3 扩展功能
 
@@ -117,8 +113,8 @@ public void addUser() {
 - 使用 Repeat 注解，可重复多次执行测试方法
 - 使用 Parallel 注解，可对单个测试方法设置成并行多次执行
 
-对测试类使用 @RunWith(ExtendBasalRunner.class) 注解（推荐）
-或者，使用 RetryRule 等规则也可以。
+对测试类使用 @RunWith(ExtendBasalRunner.class) 注解（推荐）  
+或者，使用 RetryRule 等规则也可以。  
 
 #### - 对多个测试用例类及里面的测试方法设置为并行执行
 
@@ -195,9 +191,9 @@ public void upload(String desc, String[] files) throws IOException {
 
 ### - 部署到tomcat中
 
-删除AppMain等所有与netserver.http相关的程序。（因为要使用tomcat代替内嵌的jetty）
-按照普通的web项目部署到tomcat中，WEB-INF\lib需要的jar包为：core, database, web, gson, log4j, HikariCP
-在classes下放fdconfig等资源文件
+删除AppMain等所有与netserver.http相关的程序。（因为要使用tomcat代替内嵌的jetty）  
+按照普通的web项目部署到tomcat中，WEB-INF\lib需要的jar包为：core, database, web, gson, log4j, HikariCP  
+在classes下放fdconfig等资源文件  
 web.xml中增加以下配置：
 ```
     <servlet>

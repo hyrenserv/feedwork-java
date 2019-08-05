@@ -26,7 +26,7 @@ web请求的映射规则为：使用Action类的包名+方法名，作为URL访�
 如果方法内部必须直接操作request等对象，可通过RequestUtil工具类获取。  
 所有 public 非 static 的方法，被作为web请求的响应方法。  
 如果有同名方法，需要使用 UrlName 注解为其设置别名。  
-使用 SqlOperator 可以直接操作数据库，不需要 try...catch  
+使用 Dbo 可以直接操作数据库，不需要 try...catch  
 代码中如果需要中断方法执行并返回错误信息给前端，可以直接抛出 BusinessException 异常  
 分页查询，需创建分页对象并使用相应的分页查询方法，例如：
 ```

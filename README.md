@@ -32,7 +32,7 @@ web请求的映射规则为：使用Action类的包名+方法名，作为URL访�
 ```
 public Map<String, Object> getPagedUserResult(int currPage, int pageSize) {
     Page page = new DefaultPageImpl(currPage, pageSize);
-    Result result0 = SqlOperator.queryPagedResult(page,	"select * from XXX");
+    Result result0 = Dbo.queryPagedResult(page,	"select * from XXX");
     Map<String, Object> result = new HashMap<>();
     result.put("totalSize", page.getTotalSize()); // 总记录数
     result.put("pageCount", page.getPageCount()); // 总页数

@@ -2,6 +2,8 @@
 
 ## 功能介绍
 
+创建 Gradle Java 工程，根据项目要求创建 Module，之后，按照下面介绍，创建业务处理来（Action）即可 
+
 ## 1. Action
 
 ### 1.1 编写 Action 类

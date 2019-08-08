@@ -1,6 +1,15 @@
 # feedwork
+## 一、使用样例
+### 假设有如下HTML页面：
+![page](https://github.com/hyrenserv/resources/raw/master/feedwork-java/images/page-show.png)
+### 其HTML代码如下：
+![page](https://github.com/hyrenserv/resources/raw/master/feedwork-java/images/page-code.png)
+### 对应的处理程序这样写即可：
+![page](https://github.com/hyrenserv/resources/raw/master/feedwork-java/images/code-1.png)
+### 或者，如果想用SQL完成入库，这样写：
+![page](https://github.com/hyrenserv/resources/raw/master/feedwork-java/images/code-2.png)
 
-## 功能介绍
+## 二、功能介绍
 
 创建 Gradle Java 工程，根据项目要求创建 Module，之后，按照下面介绍，创建业务处理来（Action）即可 
 
@@ -145,7 +154,7 @@ java -Dfdconf.dbinfo=./dbinfo.conf -jar fdcmdtools-2.0.jar codegen codedir=代�
 
 注意： conf 配置文件中的缩进必须是“2个空格”！
 
-## 4. Howto
+## 三、Howto
 
 ### - 文件上传
 
@@ -210,3 +219,7 @@ web.xml中增加以下配置：
 ```
 <request-character-encoding>UTF-8</request-character-encoding>
 ```
+
+### - 命令行解析
+
+使用 ArgsParser 工具类。支持“name=value”或“name”两种参数。

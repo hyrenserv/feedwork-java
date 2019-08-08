@@ -19,7 +19,7 @@
 
 - 方式一：继承 AbstractWebappBaseAction  
 每个项目首先编写自己用的 Action 父类，并继承自 AbstractWebappBaseAction;  
-重新 _doPreProcess 和 _doPostProcess 两个方法，这两个方法在每个Action函数执行前、后被自动调用。一般情况，pre中做session验证，_doPostProcess做清理操作。AbstractWebappBaseAction的_doPostProcess默认完成了DB清理工作。  
+重写 _doPreProcess 和 _doPostProcess 两个方法，这两个方法在每个Action函数执行前、后被自动调用。一般情况，pre中做session验证，_doPostProcess做清理操作。AbstractWebappBaseAction的_doPostProcess默认完成了DB清理工作。  
 
 - 方式二：使用 @Action 注解  
 如果一个包下面有多个Action类，那么需要给 @Action 注解设置 UriExt 值，该值会追加到包名路径的最后。

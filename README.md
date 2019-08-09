@@ -3,14 +3,16 @@
 - 不需要部署到TOMCAT等容器中
 - 不再需要Controller/Dao/Service等各种乱七八糟的分层
 - 不需要使用request.getParameter取数据，不需要try ... catch
+- 替换properties，使用更易懂更规整的YAML文件做配置
+- 数据库操作使用统一的工具类 Dbo（线程安全）。全部静态方法，不需要创建对象
 
-### 假设有如下HTML页面：
+### * 假设有如下HTML页面：
 ![page](https://github.com/hyrenserv/resources/raw/master/feedwork-java/images/page-show.png)
-### 其HTML代码如下：
+### * 其HTML代码如下：
 ![page](https://github.com/hyrenserv/resources/raw/master/feedwork-java/images/page-code.png)
-### 对应的处理程序这样写即可：
+### * 对应的处理程序这样写即可：
 ![page](https://github.com/hyrenserv/resources/raw/master/feedwork-java/images/code-1.png)
-### 或者，如果想用SQL完成入库，这样写：
+### * 或者，如果想用SQL完成入库，这样写：
 ![page](https://github.com/hyrenserv/resources/raw/master/feedwork-java/images/code-2.png)
 
 ## 二、功能介绍

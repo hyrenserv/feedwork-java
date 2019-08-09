@@ -1,5 +1,9 @@
 # feedwork
-## 一、使用样例
+## 一、WEB项目样例
+- 不需要部署到TOMCAT等容器中
+- 不再需要Controller/Dao/Service等各种乱七八糟的分层
+- 不需要使用request.getParameter取数据，不需要try ... catch
+
 ### 假设有如下HTML页面：
 ![page](https://github.com/hyrenserv/resources/raw/master/feedwork-java/images/page-show.png)
 ### 其HTML代码如下：

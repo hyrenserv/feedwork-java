@@ -15,6 +15,13 @@
 ### * 或者，如果想用SQL完成入库，这样写：
 ![page](https://github.com/hyrenserv/resources/raw/master/feedwork-java/images/code-2.png)
 
+详细用法参见每个模块中的单元测试代码。  
+例如，一个完整的增删改查的WEB应用，及对应的单元测试代码，见：
+```bazaar
+/web/src/test/java/fd/ng/web/hmfmswebapp/a0101/UserManagerAction.java
+/web/src/test/java/fd/ng/web/hmfmswebapp/a0101/UserManagerActionTest.java
+```
+
 ## 二、功能介绍
 
 创建 Gradle Java 工程，根据项目要求创建 Module，之后，按照下面介绍，创建业务处理来（Action）即可 

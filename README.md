@@ -153,13 +153,31 @@ public static void main(String[] args) {
 ```
 java -Dfdconf.dbinfo=./dbinfo.conf -jar fdcmdtools-2.0.jar codegen codedir=代码生成的根目录（需指定到Module的全路径名） basepkg=项目包前缀名(如：hmfms) ftldir=.\template -E
 ```
-- 把该Module目录下自动生成的 build.gradle 拷贝到项目根目录，并清空该Module下build.gradle的内容
+- 把该Module目录下自动生成的 build.gradle 拷贝到项目根目录，并清空该Module下build.gradle的内容。并且添加如下依赖：
+```
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.2'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
+    compile group: 'com.zaxxer', name: 'HikariCP', version: '3.3.1'
+    compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.19.v20190610'
+    compile group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.4.19.v20190610'
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.13.1'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
+```
 - 修改test下的dbinfo.conf（配置DB连接），执行 SqlOperatorTest 看运行状况
 - 修改main下的dbinfo.conf（配置DB连接），启动 main.AppMain ，执行 SysParaActionTest 看运行情况（项目库表必须包含sys_para表才能运行）
 
 注意： conf 配置文件中的缩进必须是“2个空格”！  
 
 ## 三、Howto
+
+### - 跨域支持
+
+默认支持跨域。  
+前端 ajax 提交时，增加： xhrFields: { withCredentials: true }  
 
 ### - 文件上传
 

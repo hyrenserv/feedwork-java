@@ -26,10 +26,9 @@ public class ResponseUtil {
 		response.setContentType("application/json; charset=utf-8");
 		response.setCharacterEncoding("UTF-8"); // 防止中文乱码
 		response.setStatus(HttpServletResponse.SC_OK);
-		response.setHeader("Cache-Control","no-cache");
-		response.setHeader("Cache-Control","no-store");
+		response.setHeader("Pragma", "No-cache"); //HTTP 1.0 backward compatibility
+		response.setHeader("Cache-Control", "no-cache,no-store,max-age=0");
 		response.setDateHeader("Expires", 0); //Causes the proxy cache to see the page as "stale"
-		response.setHeader("Pragma","no-cache"); //HTTP 1.0 backward compatibility
 		// 解决跨域访问的问题
 		if(WebinfoConf.CORS_Allow) {
 //			response.setHeader("Access-Control-Allow-Origin", WebinfoConf.CORS_acao);

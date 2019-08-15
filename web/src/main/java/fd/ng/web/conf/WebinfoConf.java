@@ -62,12 +62,12 @@ public final class WebinfoConf {
 		// 跨域
 		YamlMap cors = rootConfig.getMap("cors");
 		if(cors!=null) {
-			CORS_Allow = cors.getBool("cors.allow", false);
-			CORS_acao  = cors.getString("cors.acao", "null");
-			CORS_acam  = cors.getString("cors.acam", "POST, GET");
-			CORS_acac  = cors.getString("cors.acac", "true");
+			CORS_Allow = cors.getBool("allow", true);
+			CORS_acao  = cors.getString("acao", "null");
+			CORS_acam  = cors.getString("acam", "POST, GET");
+			CORS_acac  = cors.getString("acac", "true");
 		} else {
-			CORS_Allow = false;
+			CORS_Allow = true;
 			CORS_acao  = "null";
 			CORS_acam  = "POST, GET";
 			CORS_acac  = "true";
@@ -76,20 +76,20 @@ public final class WebinfoConf {
 		// 文件上传参数
 		YamlMap fileupload = rootConfig.getMap("fileupload");
 		if(fileupload!=null) {
-			FileUpload_SizeThreshold = fileupload.getInt("fileupload.SizeThreshold", 5 * 1024 * 1024); // 3M
-			FileUpload_FilesTotalSize = fileupload.getInt("fileupload.FilesTotalSize", 5 * 1024 * 1024);
+			FileUpload_SizeThreshold = fileupload.getInt("SizeThreshold", 5 * 1024 * 1024); // 3M
+			FileUpload_FilesTotalSize = fileupload.getInt("FilesTotalSize", 5 * 1024 * 1024);
 		} else {
 			FileUpload_SizeThreshold = 5 * 1024 * 1024;
 			FileUpload_FilesTotalSize = 5 * 1024 * 1024;
 		}
 		// 超内存限制后的临时保存目录
-		FileUpload_Repository = getDirString(fileupload, "fileupload.Repository");
+		FileUpload_Repository = getDirString(fileupload, "Repository");
 		FileUpload_RepositoryDir = new File(FileUpload_Repository);
 		if (!FileUpload_RepositoryDir.exists() || !FileUpload_RepositoryDir.isDirectory())
 			throw new FrameworkRuntimeException("fileupload.Repository wrong, must be Dir.");
 
 		// 用户预期要保存上传文件的目录
-		FileUpload_SavedDirName = getDirString(fileupload, "fileupload.SavedDir");
+		FileUpload_SavedDirName = getDirString(fileupload, "SavedDir");
 	}
 
 	private WebinfoConf() { throw new AssertionError("No WebinfoConf instances for you!"); }

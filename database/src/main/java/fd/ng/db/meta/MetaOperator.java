@@ -81,7 +81,7 @@ public class MetaOperator {
 		ResultSet rsColumnInfo = null;
 		try {
 			DatabaseMetaData dbMeta = db.getConnection().getMetaData();
-			rsTables = dbMeta.getTables(null, db.ofInfo().getUsername(), tableNamePattern, new String[]{"TABLE", "VIEW"});
+			rsTables = dbMeta.getTables(null, "%", "%", new String[]{"TABLE", "VIEW"});
 			while(rsTables.next()) {
 				TableMeta tblMeta = new TableMeta();
 				final String tableName = rsTables.getString("TABLE_NAME");
@@ -91,7 +91,7 @@ public class MetaOperator {
 				tblMeta.setUsername(rsTables.getString("TABLE_SCHEM"));
 				tblMeta.setRemarks(rsTables.getString("REMARKS"));
 
-				rsPK = dbMeta.getPrimaryKeys(null, db.ofInfo().getUsername(), tableName);
+				rsPK = dbMeta.getPrimaryKeys(null, null, tableName);
 				while (rsPK.next()) {
 					tblMeta.addPrimaryKey(rsPK.getString("COLUMN_NAME"));
 					// PK_NAME String => 主键的名称（可为 null）
@@ -125,6 +125,7 @@ public class MetaOperator {
 //			else if(!tableName.equals(currentTableName)) {
 //				currentTableName = tableName;
 //			}
+			String tableName = rs.getString( "TABLE_NAME" );
 			ColumnMeta columnMeta = new ColumnMeta();
 			String colName = rs.getString( "COLUMN_NAME" );
 			columnMeta.setName(colName);

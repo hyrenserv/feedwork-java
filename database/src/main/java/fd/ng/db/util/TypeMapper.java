@@ -52,6 +52,7 @@ public class TypeMapper {
 		_typeMapperBox.put(Types.ARRAY, Object[].class); // maybe String[] ?
 
 		_typeMapperBox.put(Types.LONGVARBINARY, byte[].class);
+		_typeMapperBox.put(Types.BINARY, byte[].class);
 
 		_typeMapper = Collections.unmodifiableMap(_typeMapperBox);
 	}

@@ -222,31 +222,6 @@ public class Dbo extends SqlOperator {
 	public static List<Map<String, Object>> queryPagedList(Page page, String sql, Object... params) {
 		return SqlOperator.queryPagedList(db(), page, sql, params);
 	}
-	/**
-	 * 查询并返回一行数据。 慎用！
-	 *
-	 * 慎用！慎用！慎用！
-	 *
-	 * 因为，如果查询SQL返回多行数据，本函数返回的是第一行数据。
-	 * 对于预期完成得到一行数据，但是又需要检查SQL是否返回了多行数据的情况，请使用 XXXListProcessor！
-	 *
-	 * @param sql String 带有'?'占位符的sql语句
-	 * @param params Object 对应sql中的'?'占位符的各个参数值
-	 * @return Object[] 不会出现null，如果没有查询到数据，返回的是空 Object[]
-	 */
-	public static Object[] queryArray(String sql, Object... params) {
-		return SqlOperator.queryArray(db(), sql, params);
-	}
-
-	/**
-	 * 查询多条数据。
-	 * @param sql String 带有'?'占位符的sql语句
-	 * @param params Object 对应sql中的'?'占位符的各个参数值
-	 * @return List<Object[]> 不会出现null，如果没有查询到数据，返回的是空 List
-	 */
-	public static List<Object[]> queryArrayList(String sql, Object... params) {
-		return SqlOperator.queryArrayList(db(), sql, params);
-	}
 
 	/**
 	 * 查询多条数据。
@@ -258,12 +233,25 @@ public class Dbo extends SqlOperator {
 		return SqlOperator.queryResult(db(), sql, params);
 	}
 
+	/**
+	 * 分页查询多条数据。
+	 * @param sql String 带有'?'占位符的sql语句
+	 * @param params Object 对应sql中的'?'占位符的各个参数值
+	 * @return Result 不会出现null，如果没有查询到数据，返回的是空 Result
+	 */
 	public static Result queryPagedResult(Page page, String sql, Object... params) {
 		return SqlOperator.queryPagedResult(db(), page, sql, params);
 	}
 
 	/**
 	 * 用于只会查询到一条数据且为一个数字的情况，比如：select count(1) from
+	 * 用法：
+	 * OptionalLong result = Dbo.queryNumber(......)
+	 * 因为：本方法对应的SQL是类似 select count(1) from，所以必须有且只有一条数据被查询到。
+	 * 所以：不满足“有且唯一”条件的就是异常。
+	 * 所以：返回值使用了Optional，取值时只有下面两种方式：
+	 * 1） long val = result.orElseThrow(() -> new BusinessException("错误描述"));
+	 * 2） long val = result.orElse(你准备使用的默认值);
 	 *
 	 * @param sql String 带有'?'占位符的sql语句
 	 * @param params Object 对应sql中的'?'占位符的各个参数值
@@ -274,8 +262,11 @@ public class Dbo extends SqlOperator {
 	}
 
 	/**
-	 * 批量执行增、删、改操作
+	 * 批量执行增、删、改操作。
+	 *
 	 * @param sql String 带有'?'占位符的sql语句
+	 * @param params List<Object[]> 每行是一组对应'?'占位符的数值。
+	 *               如果数据很多，比如100万行，构造这么大的List担心OOM，可以分批调用本函数。比如每1万行调用一次。
 	 * @return int数组的每一个值代表相应行的数据更新结果
 	 */
 	public static int[] executeBatch(String sql, List<Object[]> params) { return SqlOperator.executeBatch(db(), sql, params); }

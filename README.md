@@ -11,7 +11,7 @@
 
 详细用法参见每个模块中的单元测试代码。    
 例如，一个完整的增删改查的WEB应用，及对应的单元测试代码，见：
-```bazaar
+```text
 /web/src/test/java/fd/ng/web/hmfmswebapp/a0101/UserManagerAction.java
 /web/src/test/java/fd/ng/web/hmfmswebapp/a0101/UserManagerActionTest.java
 ```
@@ -43,7 +43,7 @@ web请求的映射规则为：使用Action类的包名+方法名，作为URL访�
 使用 SqlOperator 可以直接操作数据库，不需要 try...catch  
 代码中如果需要中断方法执行并返回错误信息给前端，可以直接抛出 BusinessException 异常  
 分页查询，需创建分页对象并使用相应的分页查询方法，例如：
-```
+```text
 public Map<String, Object> getPagedUserResult(int currPage, int pageSize) {
     Page page = new DefaultPageImpl(currPage, pageSize);
     Result result0 = Dbo.queryPagedResult(page,	"select * from XXX");
@@ -75,13 +75,13 @@ public Map<String, Object> getPagedUserResult(int currPage, int pageSize) {
 把test中的 netclientinfo.conf 配置文件中的 connectTimeout, readTimeout, writeTimeout 设置成250，以免单步跟踪时出现超时  
 
 例如，有 Action 方法如下：
-```
+```text
 public boolean addUser(String name, int age, String[] favors) {
     ......
 }
 ```
 对应的单元测试方法的样板代码：
-```
+```text
 @Test
 public void addUser() {
     // 1）提交数据给Action
@@ -96,7 +96,7 @@ public void addUser() {
 ```
 
 ### 2.2 对于需要登陆认证的测试用例处理方式
-```
+```text
     new HttpClient()
         .buildSession()
         .addData("username", "admin")
@@ -116,7 +116,7 @@ public void addUser() {
 
 #### - 测试方法中判断是否出现了预期的异常
 在测试方法中的最前面使用如下代码即可
-```
+```text
     G_ExpectedEx.expect(XXXException.class);
     G_ExpectedEx.expectMessage(containsString("XXX"));
 ```
@@ -133,7 +133,7 @@ public void addUser() {
 #### - 对多个测试用例类及里面的测试方法设置为并行执行
 
 样例代码如下：
-```
+```text
 public static void main(String[] args) {
     Class[] cls = { TestCase1.class, TestCase2.class };
     Result rt = JUnitCore.runClasses(new ParallelRunner(true, true), cls); // 这两个类及类里面的方法会被并行执行
@@ -150,11 +150,11 @@ public static void main(String[] args) {
 - 给工程新建 Module
 - 在工程根目录下创建'libs'目录(含两个子目录runtime,testcase) ，把fdcore的jar文件分别拷贝进去
 - 执行自动生成代码的命令
-```
+```shell script
 java -Dfdconf.dbinfo=./dbinfo.conf -jar fdcmdtools-2.0.jar codegen codedir=代码生成的根目录（需指定到Module的全路径名） basepkg=项目包前缀名(如：hmfms) ftldir=.\template -E
 ```
 - 把该Module目录下自动生成的 build.gradle 拷贝到项目根目录，并清空该Module下build.gradle的内容。并且添加如下依赖：
-```
+```text
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
     compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.2'
     compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
@@ -182,7 +182,7 @@ java -Dfdconf.dbinfo=./dbinfo.conf -jar fdcmdtools-2.0.jar codegen codedir=代�
 ### - 文件上传
 
 Action 方法使用UploadFile注解，参数名与上传页面中的 file 元素名对应上，参见如下代码：
-```
+```html
 <form enctype="multipart/form-data" method="post" name="fileinfo">
   文件描述：<input type="text" name="desc" /><br />
   选择文件：<input type="file" name="files" multiple /><br />
@@ -205,6 +205,7 @@ form.addEventListener('submit', function(ev) {
 }, false);
 </script>
 ```
+对应的后台 Java 处理代码为：
 ```
 @UploadFile
 public void upload(String desc, String[] files) throws IOException {
@@ -227,7 +228,7 @@ public void upload(String desc, String[] files) throws IOException {
 按照普通的web项目部署到tomcat中，WEB-INF\lib需要的jar包为：core, database, web, gson, log4j, HikariCP  
 在classes下放fdconfig等资源文件  
 web.xml中增加以下配置：
-```
+```text
     <servlet>
       <servlet-name>bizController</servlet-name>
       <servlet-class>fd.ng.web.handler.WebServlet</servlet-class>
@@ -239,10 +240,49 @@ web.xml中增加以下配置：
     </servlet-mapping>
 ```
 记得要配置成UTF-8，比如tomcat9支持servlet 4了，可以在web.xml增加一句：
-```
+```xml
 <request-character-encoding>UTF-8</request-character-encoding>
 ```
 
 ### - 命令行解析
 
-使用 ArgsParser 工具类。支持“name=value”或“name”两种参数。  
+使用 ArgsParser 工具类做命令行参数解析。  
+接受的格式为：  
+- 名值对：name=value
+- 仅参数名
+如果值中有空格、制表符等字符，需使用双引号。  
+如果有前后双引号，那么里面双引号需要加转义字符： \   
+
+例如，有如下命令行参数：
+```shell script
+java -jar yours.jar type=r rows=5000 -fw file=/tmp/io-jdk.csv
+```
+对应的解析程序为：
+```text
+public static void main(String[] args) {
+    ArgsParser cmd = new ArgsParser()
+                   	.addOption("file",   "文件名",   "读写测试的文件名", true)
+                   	.addOption("type",   "r|w|rw",   "读写测试类型", true)
+                   	.addOption("rows",   "数字",     "写文件的总行数", false)
+                   	.addOption("-fw",    "每次写操作时，是否自动执行flush", false)
+                   	.parse(args);
+    // 以上构造了一个命令行对象，之后，可通过如下方式获取各参数的实际输入值
+    if(....) {
+        cmd.usage();  // 显示完整的参数使用说明。（其说明文字来源于上面的各个 addOption）
+        System.exit(-1);
+    }
+
+    String filename = cmd.option("file").value;
+    if(cmd.option("type").is("w")) {
+        // 执行相关操作
+    }
+}
+```
+ArgsParser cmd = new ArgsParser()
+                  .addOption("type", "r|w|d", "读写删除", true)
+                  ...... 依次把每个参数初始化进来
+                  .parse(args); // args就是 main 函数的参数
+
+ 后续代码中，获取命令行输入项： cmd.option("type")
+
+ 

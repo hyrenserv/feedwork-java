@@ -89,7 +89,7 @@ public class SqlOperator {
 	 */
 	public static <T> List<T> queryList(DatabaseWrapper db, Class<T> classOfBean,
 	                                        String sql, Object... params) {
-		return db.query(sql, new BeanListProcessor<T>(classOfBean), params);
+		return db.query(sql, new BeanListProcessor<>(classOfBean), params);
 	}
 
 	public static <T> List<T> queryPagedList(DatabaseWrapper db, Class<T> classOfBean, Page page,
@@ -98,7 +98,7 @@ public class SqlOperator {
 		if(page.getBeginOfPage()>=page.getEndOfPage()) throw new RevitalizedCheckedException("begin必须小于end！");
 		int begin = page.getBeginOfPage();
 		int end = page.getEndOfPage();
-		List<T> result = db.queryPaged(sql, begin, end, page.isCountTotalSize(), new BeanListProcessor<T>(classOfBean), params);
+		List<T> result = db.queryPaged(sql, begin, end, page.isCountTotalSize(), new BeanListProcessor<>(classOfBean), params);
 		page.setTotalSize(db.getCounts());
 		return result;
 	}
@@ -172,6 +172,13 @@ public class SqlOperator {
 
 	/**
 	 * 用于只会查询到一条数据且为一个数字的情况，比如：select count(1) from
+	 * 用法：
+	 * OptionalLong result = Dbo.queryNumber(......)
+	 * 因为：本方法对应的SQL是类似 select count(1) from，所以必须有且只有一条数据被查询到。
+	 * 所以：不满足“有且唯一”条件的就是异常。
+	 * 所以：返回值使用了Optional，取值时只有下面两种方式：
+	 * 1） long val = result.orElseThrow(() -> new BusinessException("错误描述"));
+	 * 2） long val = result.orElse(你准备使用的默认值);
 	 *
 	 * @param db DatabaseWrapper
 	 * @param sql String 带有'?'占位符的sql语句
@@ -199,6 +206,8 @@ public class SqlOperator {
 	 * 批量执行增、删、改操作
 	 * @param db DatabaseWrapper
 	 * @param sql String 带有'?'占位符的sql语句
+	 * @param params List<Object[]> 每行是一组对应'?'占位符的数值。
+	 *               如果数据很多，比如100万行，构造这么大的List担心OOM，可以分批调用本函数。比如每1万行调用一次。
 	 * @return int数组的每一个值代表相应行的数据更新结果
 	 */
 	public static int[] executeBatch(DatabaseWrapper db, String sql, List<Object[]> params) {

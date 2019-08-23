@@ -278,11 +278,5 @@ public static void main(String[] args) {
     }
 }
 ```
-ArgsParser cmd = new ArgsParser()
-                  .addOption("type", "r|w|d", "读写删除", true)
-                  ...... 依次把每个参数初始化进来
-                  .parse(args); // args就是 main 函数的参数
-
- 后续代码中，获取命令行输入项： cmd.option("type")
 
  

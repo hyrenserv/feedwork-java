@@ -43,15 +43,17 @@ web请求的映射规则为：使用Action类的包名+方法名，作为URL访�
 使用 SqlOperator 可以直接操作数据库，不需要 try...catch  
 代码中如果需要中断方法执行并返回错误信息给前端，可以直接抛出 BusinessException 异常  
 分页查询，需创建分页对象并使用相应的分页查询方法，例如：
-```text
-public Map<String, Object> getPagedUserResult(int currPage, int pageSize) {
-    Page page = new DefaultPageImpl(currPage, pageSize);
-    Result result0 = Dbo.queryPagedResult(page,	"select * from XXX");
-    Map<String, Object> result = new HashMap<>();
-    result.put("totalSize", page.getTotalSize()); // 总记录数
-    result.put("pageCount", page.getPageCount()); // 总页数
-    result.put("data", result0.toList());
-    return result;
+```java
+public class YoursAction {
+    public Map<String, Object> getPagedUserResult(int currPage, int pageSize) {
+        Page page = new DefaultPageImpl(currPage, pageSize);
+        Result result0 = Dbo.queryPagedResult(page,	"select * from XXX");
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalSize", page.getTotalSize()); // 总记录数
+        result.put("pageCount", page.getPageCount()); // 总页数
+        result.put("data", result0.toList());
+        return result;
+    }
 }
 ```
 
@@ -75,23 +77,27 @@ public Map<String, Object> getPagedUserResult(int currPage, int pageSize) {
 把test中的 netclientinfo.conf 配置文件中的 connectTimeout, readTimeout, writeTimeout 设置成250，以免单步跟踪时出现超时  
 
 例如，有 Action 方法如下：
-```text
-public boolean addUser(String name, int age, String[] favors) {
-    ......
+```java
+public class YoursAction {
+    public boolean addUser(String name, int age, String[] favors) {
+        return true;
+    }
 }
 ```
 对应的单元测试方法的样板代码：
-```text
-@Test
-public void addUser() {
-    // 1）提交数据给Action
-    HttpClient.ResponseValue resVal = new HttpClient()
-            .addData("name", "张三")          // 每个 addData 为一个"名/值"对
-            .addData("age",  25)
-            .post(getActionUrl("addUser"));   // getActionUrl中传入“被测试的Action方法名字”
-    
-    // 2）断言判断返回值
-    assertThat(resVal, containsString("hello:张三"));
+```java
+public class YoursActionTest {
+    @Test
+    public void addUser() {
+        // 1）提交数据给Action
+        HttpClient.ResponseValue resVal = new HttpClient()
+                .addData("name", "张三")          // 每个 addData 为一个"名/值"对
+                .addData("age",  25)
+                .post(getActionUrl("addUser"));   // getActionUrl中传入“被测试的Action方法名字”
+        
+        // 2）断言判断返回值
+        assertThat(resVal, containsString("hello:张三"));
+    }
 }
 ```
 
@@ -114,13 +120,6 @@ public void addUser() {
 
 ### 2.3 扩展功能
 
-#### - 测试方法中判断是否出现了预期的异常
-在测试方法中的最前面使用如下代码即可
-```text
-    G_ExpectedEx.expect(XXXException.class);
-    G_ExpectedEx.expectMessage(containsString("XXX"));
-```
-
 #### - 可用的注解
 - 使用 Timeout 注解，对测试方法判断执行时间是否小于该时间
 - 使用 Retry 注解，对测试方法可以进行反复重试，直到成功为止
@@ -133,14 +132,16 @@ public void addUser() {
 #### - 对多个测试用例类及里面的测试方法设置为并行执行
 
 样例代码如下：
-```text
-public static void main(String[] args) {
-    Class[] cls = { TestCase1.class, TestCase2.class };
-    Result rt = JUnitCore.runClasses(new ParallelRunner(true, true), cls); // 这两个类及类里面的方法会被并行执行
-    // 观察执行结果
-    System.out.println("wasSuccessful=" + rt.wasSuccessful() + ", getIgnoreCount=" + rt.getIgnoreCount());
-    System.out.println("getRunCount=" + rt.getRunCount() + ", getRunTime=" + rt.getRunTime());
-    System.out.println("getFailureCount=" + rt.getFailureCount() + ", getRunTime=" + rt.getFailures().stream().map(Failure::toString).collect(Collectors.joining(" | ")));
+```java
+public class SomeTestSuite {
+    public static void main(String[] args) {
+        Class[] cls = { TestCase1.class, TestCase2.class };
+        Result rt = JUnitCore.runClasses(new ParallelRunner(true, true), cls); // 这两个类及类里面的方法会被并行执行
+        // 观察执行结果
+        System.out.println("wasSuccessful=" + rt.wasSuccessful() + ", getIgnoreCount=" + rt.getIgnoreCount());
+        System.out.println("getRunCount=" + rt.getRunCount() + ", getRunTime=" + rt.getRunTime());
+        System.out.println("getFailureCount=" + rt.getFailureCount() + ", getRunTime=" + rt.getFailures().stream().map(Failure::toString).collect(Collectors.joining(" | ")));
+    }
 }
 ```
 
@@ -148,13 +149,10 @@ public static void main(String[] args) {
 
 - 新建 Gradle java 工程（不需要任何和Web相关的插件）
 - 给工程新建 Module
-- 在工程根目录下创建'libs'目录(含两个子目录runtime,testcase) ，把fdcore的jar文件分别拷贝进去
-- 执行自动生成代码的命令
-```shell script
-java -Dfdconf.dbinfo=./dbinfo.conf -jar fdcmdtools-2.0.jar codegen codedir=代码生成的根目录（需指定到Module的全路径名） basepkg=项目包前缀名(如：hmfms) ftldir=.\template -E
-```
-- 把该Module目录下自动生成的 build.gradle 拷贝到项目根目录，并清空该Module下build.gradle的内容。并且添加如下依赖：
-```text
+- 把“资源库”里面的libs目录放到在工程根目录下（含libs目录）
+- 使用“资源库”里面的 fdcmdtools 自动生成初始代码（使用方式有说明）
+- 把该Module目录下自动生成的 build.gradle 拷贝到项目根目录，并清空该Module下build.gradle的内容。根gradle文件添加如下依赖：
+```groovy
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
     compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.2'
     compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
@@ -167,8 +165,8 @@ java -Dfdconf.dbinfo=./dbinfo.conf -jar fdcmdtools-2.0.jar codegen codedir=代�
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
 ```
-- 修改test下的dbinfo.conf（配置DB连接），执行 SqlOperatorTest 看运行状况
-- 修改main下的dbinfo.conf（配置DB连接），启动 main.AppMain ，执行 SysParaActionTest 看运行情况（项目库表必须包含sys_para表才能运行）
+- 修改test下的 dbinfo.conf（配置自己的DB连接），执行 SqlOperatorTest 看运行状况
+- 修改main下的 dbinfo.conf（配置自己的DB连接），启动 main.AppMain ，执行 SysParaActionTest 看运行情况（项目库表必须包含sys_para表才能运行）
 
 注意： conf 配置文件中的缩进必须是“2个空格”！  
 
@@ -206,15 +204,16 @@ form.addEventListener('submit', function(ev) {
 </script>
 ```
 对应的后台 Java 处理代码为：
-```
-@UploadFile
-public void upload(String desc, String[] files) throws IOException {
-    for(String curFileinfo : files) {
-        File uploadedFile = FileUploadUtil.getUploadedFile(curFileinfo);       // 已经上传到服务器的文件
-        String orgnFilename = FileUploadUtil.getOriginalFileName(curFileinfo); // 原始文件名
+```java
+public class YoursAction {
+    @UploadFile
+    public void upload(String desc, String[] files) throws IOException {
+        for(String curFileinfo : files) {
+            File uploadedFile = FileUploadUtil.getUploadedFile(curFileinfo);       // 已经上传到服务器的文件
+            String orgnFilename = FileUploadUtil.getOriginalFileName(curFileinfo); // 原始文件名
+        }
     }
 }
-
 ```
 可以在 UploadFile 注解中设置上传文件的默认存放目录
 
@@ -228,7 +227,8 @@ public void upload(String desc, String[] files) throws IOException {
 按照普通的web项目部署到tomcat中，WEB-INF\lib需要的jar包为：core, database, web, gson, log4j, HikariCP  
 在classes下放fdconfig等资源文件  
 web.xml中增加以下配置：
-```text
+```xml
+<web-app>
     <servlet>
       <servlet-name>bizController</servlet-name>
       <servlet-class>fd.ng.web.handler.WebServlet</servlet-class>
@@ -238,6 +238,7 @@ web.xml中增加以下配置：
         <servlet-name>bizController</servlet-name>
         <url-pattern>/action/*</url-pattern>
     </servlet-mapping>
+</web-app>
 ```
 记得要配置成UTF-8，比如tomcat9支持servlet 4了，可以在web.xml增加一句：
 ```xml
@@ -258,23 +259,21 @@ web.xml中增加以下配置：
 java -jar yours.jar type=r rows=5000 -fw file=/tmp/io-jdk.csv
 ```
 对应的解析程序为：
-```text
-public static void main(String[] args) {
-    ArgsParser cmd = new ArgsParser()
-                   	.addOption("file",   "文件名",   "读写测试的文件名", true)
-                   	.addOption("type",   "r|w|rw",   "读写测试类型", true)
-                   	.addOption("rows",   "数字",     "写文件的总行数", false)
-                   	.addOption("-fw",    "每次写操作时，是否自动执行flush", false)
-                   	.parse(args);
-    // 以上构造了一个命令行对象，之后，可通过如下方式获取各参数的实际输入值
-    if(....) {
-        cmd.usage();  // 显示完整的参数使用说明。（其说明文字来源于上面的各个 addOption）
-        System.exit(-1);
-    }
-
-    String filename = cmd.option("file").value;
-    if(cmd.option("type").is("w")) {
-        // 执行相关操作
+```java
+public class YoursMainClass {
+    public static void main(String[] args) {
+        ArgsParser cmd = new ArgsParser()
+                        .addOption("file",   "文件名",   "读写测试的文件名", true)
+                        .addOption("type",   "r|w|rw",   "读写测试类型", true)
+                        .addOption("rows",   "数字",     "写文件的总行数", false)
+                        .addOption("-fw",    "每次写操作时，是否自动执行flush", false)
+                        .parse(args);
+        // cmd.usage();  // 显示完整的参数使用说明。（其说明文字来源于上面的各个 addOption）
+        // 以上构造了一个命令行对象，之后，可通过如下方式获取各参数的实际输入值
+        String filename = cmd.option("file").value;
+        if(cmd.option("type").is("w")) {
+            // do something
+        }
     }
 }
 ```

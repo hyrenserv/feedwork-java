@@ -16,7 +16,64 @@
 /web/src/test/java/fd/ng/web/hmfmswebapp/a0101/UserManagerActionTest.java
 ```
 
-## 二、功能介绍
+## 二、搭建新项目的步骤
+
+- 新建 Gradle java 工程（不需要任何和Web相关的插件）
+- 给工程新建 Module
+- 下载 [libs](https://github.com/hyrenserv/resources/tree/master/feedwork-java) 目录放到在工程根目录下（含libs目录）
+- 开始编码
+  - __方式一__：自动生成初始代码骨架
+    - 使用 [fdcmdtools](https://github.com/hyrenserv/resources/tree/master/feedwork-java) 生成代码骨架
+    - 把自动生成的 build.gradle 拷贝到项目根目录。该Module下的build.gradle一般应该清空。
+    - 修改test下的 dbinfo.conf（配置自己的DB连接），执行 SqlOperatorTest 看运行状况
+    - 修改main下的 dbinfo.conf（配置自己的DB连接），启动 main.AppMain ，执行 SysParaActionTest 看运行情况（项目库表必须包含sys_para表才能运行）
+    - 在biz包下，编写具体业务处理的代码
+    
+  - __方式二__：从零开始
+    - (1) 创建目录结构，建议为：
+    ```text
+    basepackagename.biz.a0101  // 按照业务功能对应创建相应的包：a0101, b0101 ......
+                               // 业务层中，所有公共的、全局的代码，用 z 开头的包名
+                               // 例如：
+    basepackagename.biz.zauth  // 登陆验证
+    basepackagename.biz.zbase  // 存放基类的包
+    basepackagename.entity     // 存放与DB表对应的实体类
+    basepackagename.exception  // 存放整个项目的异常处理基类
+    basepackagename.main       // 项目启动类
+    basepackagename.util       // 项目工具类
+    ```
+    - (2) 编写业务处理基类 `zbase.WebappBaseAction` 重载 `_doPreProcess` 方法，完成Session验证等处理代码
+    ```java
+    package basepackagename.biz.zbase;
+    public abstract class WebappBaseAction extends AbstractWebappBaseAction {
+        @Override
+        protected ActionResult _doPreProcess(HttpServletRequest request) {
+            
+	    // 完成 session 验证等各种处理
+
+	    return null; // 返回null表示各种验证都通过了
+        }
+    }
+    ```
+    - (3) 编写项目启动类
+    ```java
+    package basepackagename.main;
+    public class AppMain extends WebServer{
+        public static void main(String[] args) {
+            new AppMain().running();
+        }
+    }
+    ```
+    - (4) 编写conf文件
+    ```text
+    appinfo.conf    : 设置 basePackage
+    dbinfo.conf     : 设置数据库连接信息
+    httpserver.conf : 设置 port, webContext
+    webinfo.conf    : 根据实际情况设置（也可以为空，全部使用默认值）
+    ```
+    - (5) 在biz包下，编写具体业务处理的代码
+
+## 三、功能介绍
 
 ## 1. Action
 
@@ -144,31 +201,6 @@ public class SomeTestSuite {
     }
 }
 ```
-
-## 3. 搭建新项目的步骤
-
-- 新建 Gradle java 工程（不需要任何和Web相关的插件）
-- 给工程新建 Module
-- 把“资源库”里面的libs目录放到在工程根目录下（含libs目录）
-- 使用“资源库”里面的 fdcmdtools 自动生成初始代码（使用方式有说明）
-- 把该Module目录下自动生成的 build.gradle 拷贝到项目根目录，并清空该Module下build.gradle的内容。根gradle文件添加如下依赖：
-```groovy
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.2'
-    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
-    compile group: 'com.zaxxer', name: 'HikariCP', version: '3.3.1'
-    compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
-    compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.19.v20190610'
-    compile group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.4.19.v20190610'
-    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.13.1'
-
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
-```
-- 修改test下的 dbinfo.conf（配置自己的DB连接），执行 SqlOperatorTest 看运行状况
-- 修改main下的 dbinfo.conf（配置自己的DB连接），启动 main.AppMain ，执行 SysParaActionTest 看运行情况（项目库表必须包含sys_para表才能运行）
-
-注意： conf 配置文件中的缩进必须是“2个空格”！  
 
 ## 三、Howto
 

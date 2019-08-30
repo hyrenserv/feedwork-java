@@ -92,4 +92,27 @@ public class DateUtil {
 		LocalDateTime dateTime = LocalDateTime.now();
 		return dateTime.format(dtf);
 	}
+	/**
+	 * 8位字符的字符串转换为Date对象
+	 * @author Tiger.Wang
+	 * @date 2019/8/30
+	 * @param dateStr	8位字符的字符串
+	 * @return java.time.LocalDate	日期对象
+	 */
+	public static LocalDate parseStr2DateWith8Char(String dateStr) {
+
+		return LocalDate.parse(dateStr, DATE_DEFAULT);
+	}
+
+	/**
+	 * 6位字符的字符串转换为Time对象
+	 * @author Tiger.Wang
+	 * @date 2019/8/30
+	 * @param timeStr	6位字符的字符串
+	 * @return java.time.LocalTime	Time对象
+	 */
+	public static LocalTime parseStr2TimeWith6Char(String timeStr) {
+
+		return LocalTime.parse(timeStr, TIME_DEFAULT);
+	}
 }

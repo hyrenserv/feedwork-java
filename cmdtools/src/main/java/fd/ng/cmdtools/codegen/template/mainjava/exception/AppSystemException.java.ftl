@@ -6,6 +6,12 @@ import org.apache.logging.log4j.Logger;
 
 public class ${className} extends BusinessSystemException {
 	private static final Logger logger = LogManager.getLogger();
+
+	public ${className}(final String msg) {
+		super(msg);
+		logger.error(String.format("%s | %s%s |", getMessage(), ERRCODE_LOGPREFIX, errorCode));
+	}
+
 	public ${className}(Throwable cause) {
 		super(cause);
 		logger.error(String.format("%s | %s%s |", getMessage(), ERRCODE_LOGPREFIX, errorCode), cause);

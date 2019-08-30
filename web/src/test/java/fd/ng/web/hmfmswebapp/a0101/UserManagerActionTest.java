@@ -133,7 +133,6 @@ public class UserManagerActionTest extends WebBaseTestCase {
 
 	@Test
 	public void bizExcetion_OnlyMsg() {
-//		String responseValue = post(getActionUrl("bizExcetion_OnlyMsg"));
 		String responseValue = new HttpClient().post(getActionUrl("bizExcetion_OnlyMsg")).getBodyString();
 
 		assertThat(responseValue, containsString("\"code\": 220,"));
@@ -142,7 +141,6 @@ public class UserManagerActionTest extends WebBaseTestCase {
 	}
 	@Test
 	public void bizExcetion_ResNoArgs() {
-//		String responseValue = post(getActionUrl("bizExcetion_ResNoArgs"));
 		String responseValue = new HttpClient().post(getActionUrl("bizExcetion_ResNoArgs")).getBodyString();
 		assertThat(responseValue, containsString("\"code\": 220,"));
 		// 因为后台抛出了异常时，使用的是资源文件中的内容，框架会把这个消息返回前端
@@ -150,13 +148,44 @@ public class UserManagerActionTest extends WebBaseTestCase {
 	}
 	@Test
 	public void bizExcetion_ResHasArgs() {
-//		String responseValue = post(getActionUrl("bizExcetion_ResHasArgs"));
 		String responseValue = new HttpClient().post(getActionUrl("bizExcetion_ResHasArgs")).getBodyString();
 		assertThat(responseValue, containsString("\"code\": 220,"));
 		// 因为后台抛出了异常时，使用的是资源文件中的内容，框架会把这个消息返回前端
 		assertThat(responseValue, containsString("\"message\": \"typeOfSQL of 用户(FD飞) is 123.\","));
 	}
 
+	// --------- 指定错误编码的异常 ---------
+	@Test
+	public void bizCodeExcetion_denyValue() {
+		String responseValue = new HttpClient().post(getActionUrl("bizCodeExcetion_denyValue")).getBodyString();
+
+		// 因为在总控中的异常处理段，再次抛出运行时异常，这就编程了系统错误，且不会以JSON格式返回前端
+		assertThat(responseValue, containsString("HTTP ERROR 500"));
+	}
+	@Test
+	public void bizCodeExcetion_OnlyMsg() {
+		String responseValue = new HttpClient().post(getActionUrl("bizCodeExcetion_OnlyMsg")).getBodyString();
+
+		assertThat(responseValue, containsString("\"code\": 1101,"));
+		// 因为后台抛出了异常是带有自定义提示消息的，框架会把这个消息返回前端
+		assertThat(responseValue, containsString("\"message\": \"only msg\","));
+	}
+	@Test
+	public void bizCodeExcetion_ResNoArgs() {
+		String responseValue = new HttpClient().post(getActionUrl("bizCodeExcetion_ResNoArgs")).getBodyString();
+		assertThat(responseValue, containsString("\"code\": 1102,"));
+		// 因为后台抛出了异常时，使用的是资源文件中的内容，框架会把这个消息返回前端
+		assertThat(responseValue, containsString("\"message\": \"User list!\","));
+	}
+	@Test
+	public void bizCodeExcetion_ResHasArgs() {
+		String responseValue = new HttpClient().post(getActionUrl("bizCodeExcetion_ResHasArgs")).getBodyString();
+		assertThat(responseValue, containsString("\"code\": 1103,"));
+		// 因为后台抛出了异常时，使用的是资源文件中的内容，框架会把这个消息返回前端
+		assertThat(responseValue, containsString("\"message\": \"typeOfSQL of 用户(FD飞) is 123.\","));
+	}
+
+	// --------- 系统异常 ---------
 	@Test
 	public void bizSysExcetion_OnlyEx() {
 		String responseValue = post(getActionUrl("bizSysExcetion_OnlyEx"));

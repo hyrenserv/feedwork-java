@@ -45,9 +45,10 @@ public class BusinessProcessException extends RuntimeOnlyMessageException {
 	private static final long serialVersionUID = -6070720704417179977L;
 	private static final String[] EMPTY_MSGARGS = new String[0];
 
-	protected String message;
-	protected String resourceKeyName;    // 信息文件中，每行的keyname
-	protected Object[] resourceArgs;  // 替换占位符的信息
+	protected final String      message;
+	protected final int         code;               // 在业务层，用于给抛出的异常进行业务意义的分类标号。比如 1101 表示插入失败；
+	protected final String      resourceKeyName;    // 信息文件中，每行的keyname
+	protected final Object[]    resourceArgs;       // 替换占位符的信息
 	/**
 	 * 错误信息的i18n ResourceBundle.
 	 */
@@ -74,18 +75,36 @@ public class BusinessProcessException extends RuntimeOnlyMessageException {
 //	public BusinessProcessException() {}
 
 	/**
-	 * 直接设置错误提示信息
+	 * 构建指定错误信息的异常
 	 *
 	 * @param message
 	 *            String 错误信息
 	 */
 	public BusinessProcessException(final String message) {
-		if(StringUtil.isEmpty(message)) throw new FrameworkRuntimeException("BusinessProcessException's arguments must not null");
-		this.message = message;
+		if(StringUtil.isEmpty(message)) throw new FrameworkRuntimeException("argument 'message' must not null");
+		this.message            = message;
+		this.code               = Integer.MIN_VALUE;    // 表示没设置code。
+		this.resourceKeyName    = null;
+		this.resourceArgs       = null;
 	}
 
 	/**
-	 * 通过信息代码构造完整的提示信息。<Br>
+	 * 构建带有自定义业务意义编码和指定错误信息的异常
+	 *
+	 * @param code int 业务层用户自定义的编码
+	 * @param message String 指定错误信息
+	 */
+	public BusinessProcessException(final int code, final String message) {
+		if(code==Integer.MIN_VALUE) throw new FrameworkRuntimeException("argument 'code' must not Integer.MIN_VALUE");
+		if(StringUtil.isEmpty(message)) throw new FrameworkRuntimeException("argument 'message' must not null");
+		this.message            = message;
+		this.code               = code;
+		this.resourceKeyName    = null;
+		this.resourceArgs       = null;
+	}
+
+	/**
+	 * 通过资源文件中的信息代码，构造异常对象。<Br>
 	 *
 	 * 例如：biz_errors.properties文件中：
 	 *     ws01.project.exist=id={0}, 小区[{1}]的 {2} 的工程决案已经存在！
@@ -97,12 +116,34 @@ public class BusinessProcessException extends RuntimeOnlyMessageException {
 	 *      id=320001, 小区[天山花园一期]的 《32~35外墙粉刷项目》 的工程决案已经存在！
 	 *
 	 * @param resKeyName
-	 *            String 代码
+	 *            String 资源文件中的代码
 	 * @param resArgs
 	 *            String[] 多个错误提示。因为配置文件中的信息语句中可能存在多个占位参数。
 	 */
 	public BusinessProcessException(final String resKeyName, final Object[] resArgs) {
 		if(StringUtil.isEmpty(resKeyName)) throw new FrameworkRuntimeException("BusinessProcessException's resource KeyName must not null");
+
+		this.message = null;                // 表示没设置message。
+		this.code    = Integer.MIN_VALUE;   // 表示没设置code。
+
+		this.resourceKeyName = resKeyName;
+		if(resArgs==null) this.resourceArgs = EMPTY_MSGARGS;
+		else this.resourceArgs = resArgs;
+	}
+
+	/**
+	 * 通过业务意义编码和资源文件中的信息代码，构造异常对象。<Br>
+	 *
+	 * @param code int 业务层用户自定义的编码
+	 * @param resKeyName String 资源文件中的信息代码
+	 * @param resArgs String[] 多个错误提示。因为配置文件中的信息语句中可能存在多个占位参数。
+	 */
+	public BusinessProcessException(final int code, final String resKeyName, final Object[] resArgs) {
+		if(StringUtil.isEmpty(resKeyName)) throw new FrameworkRuntimeException("BusinessProcessException's resource KeyName must not null");
+
+		this.message = null;                // 表示没设置message。
+
+		this.code = code;
 		this.resourceKeyName = resKeyName;
 		if(resArgs==null) this.resourceArgs = EMPTY_MSGARGS;
 		else this.resourceArgs = resArgs;
@@ -120,6 +161,14 @@ public class BusinessProcessException extends RuntimeOnlyMessageException {
 		} catch(MissingResourceException mse) {
 			return String.format("Missing resource KeyName : '%s' for resource Args : ' %s '", resourceKeyName, Arrays.toString(resourceArgs));
 		}
+	}
+
+	public boolean isNullCode() {
+		return this.code == Integer.MIN_VALUE;
+	}
+
+	public int getCode() {
+		return this.code;
 	}
 
 	public String getResourceKeyName() {

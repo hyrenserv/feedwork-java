@@ -11,12 +11,14 @@ import fd.ng.web.util.Dbo;
 import ${basePackage}.biz.zbase.WebappBaseAction;
 import ${basePackage}.entity.SysPara;
 import ${basePackage}.exception.BusinessException;
+import ${basePackage}.exception.AppSystemException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.OptionalLong;
 
 public class SysParaAction extends WebappBaseAction {
 	private static final Logger logger = LogManager.getLogger();
@@ -27,11 +29,16 @@ public class SysParaAction extends WebappBaseAction {
 	}
 
 	public void update(String name, String value) {
+		OptionalLong result = Dbo.queryNumber(
+				"select count(1) from "+ SysPara.TableName+" where para_name=?", name);
+		long val = result.orElseThrow(() -> new AppSystemException("Error select-count"));
+		if(val!=1L)
+			throw new BusinessException(1101, "被更新的数据不存在！name="+name);
 		SysPara sysPara = new SysPara();
 		sysPara.setPara_name(name);
 		sysPara.setPara_value(value);
 		if(sysPara.update(Dbo.db())!=1)
-			throw new BusinessException( String.format("更新数据失败！name=%s, value=%s", name, value) );
+			throw new BusinessException(1102, String.format("更新数据失败！name=%s, value=%s", name, value) );
 	}
 
 	public void delete(String name) {

@@ -21,7 +21,7 @@ public class BusinessException extends BusinessProcessException {
 	public BusinessException(final String message)
 	{
 		super(message);
-		logger.info("{} {}", RequestUtil.getBizId(), getMessage());
+		logger.info("{} --> {}", RequestUtil.getBizId(), getMessage());
 	}
 
 	/**
@@ -44,6 +44,29 @@ public class BusinessException extends BusinessProcessException {
 	public BusinessException(final String resKeyName, final Object[] resArgs)
 	{
 		super(resKeyName, resArgs);
-		logger.info("{} {}", RequestUtil.getBizId(), getMessage());
+		logger.info("{} --> {}", RequestUtil.getBizId(), getMessage());
+	}
+
+	/**
+	 * 构建带有自定义业务意义编码和指定错误信息的异常，并自动把 message 打入日志中。 <Br>
+	 *
+	 * @param code int 业务层用户自定义的编码
+	 * @param message String 指定错误信息
+	 */
+	public BusinessException(final int code, final String message) {
+		super(code, message);
+		logger.info("{} --> {}, {}", RequestUtil.getBizId(), code, getMessage());
+	}
+
+	/**
+	 * 通过自定义业务意义编码和资源文件中的信息代码，构造异常对象，并自动把 message 打入日志中。<Br>
+	 *
+	 * @param code int 业务层用户自定义的编码
+	 * @param resKeyName String 资源文件中的信息代码
+	 * @param resArgs String[] 多个错误提示。因为配置文件中的信息语句中可能存在多个占位参数。
+	 */
+	public BusinessException(final int code, final String resKeyName, final Object[] resArgs) {
+		super(code, resKeyName, resArgs);
+		logger.info("{} --> {}, {}", RequestUtil.getBizId(), code, getMessage());
 	}
 }

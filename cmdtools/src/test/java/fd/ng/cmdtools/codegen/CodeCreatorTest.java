@@ -25,7 +25,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 @Ignore("代码生成工具的测试需要手工执行并观察")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CodeCreatorTest extends FdBaseTestCase {
-	private static final String ftlRootDir = "D:\\java\\app\\intellij2018\\feedwork\\cmdtools\\src\\main\\java\\fd\\ng\\cmdtools\\codegen\\template";
+	private static final String ftlRootDir = "D:\\java\\app\\intellij2018\\feedwork-java\\cmdtools\\src\\main\\java\\fd\\ng\\cmdtools\\codegen\\template";
 //	private static final String testTableName = "__EntityCodeGen_fd_17456";
 //	@BeforeClass
 //	public static void start() {

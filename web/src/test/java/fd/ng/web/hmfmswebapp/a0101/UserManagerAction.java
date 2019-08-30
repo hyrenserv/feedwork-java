@@ -118,6 +118,22 @@ public class UserManagerAction extends WebappBaseAction {
 				"FD飞", 123
 		});
 	}
+
+	public Map<String, String> bizCodeExcetion_denyValue() {
+		throw new BusinessException(100, "deny value"); // 验证小于1000的编码值不允许使用
+	}
+	public Map<String, String> bizCodeExcetion_OnlyMsg() {
+		throw new BusinessException(1101, "only msg");
+	}
+	public Map<String, String> bizCodeExcetion_ResNoArgs() {
+		throw new BusinessException(1102, "hmfms.a0101.userlist", null);
+	}
+	public Map<String, String> bizCodeExcetion_ResHasArgs() {
+		throw new BusinessException(1103, "hmfms.a0101.userinfo", new Object[]{
+				"FD飞", 123
+		});
+	}
+
 	public Map<String, String> bizSysExcetion_OnlyEx() {
 		throw new AppSystemException(new SQLException("only SQLException"));
 	}

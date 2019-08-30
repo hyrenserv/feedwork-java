@@ -4,7 +4,6 @@ import fd.ng.core.exception.BusinessProcessException;
 import fd.ng.core.exception.internal.FrameworkRuntimeException;
 import fd.ng.core.utils.JsonUtil;
 import fd.ng.core.utils.StringUtil;
-import fd.ng.db.resultset.Result;
 
 public class ActionResultHelper {
 	public static ActionResult success() {
@@ -14,20 +13,20 @@ public class ActionResultHelper {
 		return new ActionResult(ActionResultEnum.SUCCESS.getCode(), ActionResultEnum.SUCCESS.getMessage(), data);
 	}
 
-	/**
-	 * 业务层抛出BusinessException时，构造的ActionResult
-	 * @param data
-	 * @return
-	 */
-	public static ActionResult bizError(BusinessProcessException bex, Object data) {
-		if(bex==null) {
-			throw new FrameworkRuntimeException("BusinessException can not be null!");
-		}
-		return new ActionResult(ActionResultEnum.BIZ_ERROR.getCode(), bex.getMessage(), data);
-	}
 	public static ActionResult bizError(String errorMsg) {
 		if(errorMsg==null) errorMsg = ActionResultEnum.BIZ_ERROR.getMessage();
 		return new ActionResult(ActionResultEnum.BIZ_ERROR.getCode(), errorMsg);
+	}
+	public static ActionResult bizError(BusinessProcessException bex) {
+		if(bex==null) {
+			throw new FrameworkRuntimeException("BusinessException can not be null!");
+		}
+		if(bex.isNullCode()) return new ActionResult(ActionResultEnum.BIZ_ERROR.getCode(), bex.getMessage());
+		else {
+			if(bex.getCode()<1000)
+				throw new FrameworkRuntimeException("You can only use code value more than 1000!");
+			return new ActionResult(bex.getCode(), bex.getMessage());
+		}
 	}
 
 	public static ActionResult systemError() {

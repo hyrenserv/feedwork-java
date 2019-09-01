@@ -4,6 +4,12 @@ import fd.ng.core.exception.BusinessSystemException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * 项目中可直接使用的异常，用于对系统级异常的封装。
+ * 业务处理代码中，如果发生了各种需要中断处理的情况，应该抛出 {@link BusinessException}
+ * 如果不属于以上范畴，则抛出本异常。
+ * 大多数情况，都是 try...catch 的catch代码段中，对发生的异常进行再包裹后抛出。
+ */
 public class AppSystemException extends BusinessSystemException {
 	private static final Logger logger = LogManager.getLogger();
 

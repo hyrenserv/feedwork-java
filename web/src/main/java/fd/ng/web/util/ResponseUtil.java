@@ -98,8 +98,7 @@ public class ResponseUtil {
 		writeJSON(response, ActionResultHelper.bizError(bex));
 	}
 	public static void writeActionBizError(HttpServletResponse response, BusinessSystemException bex) {
-		// 只把构造这个异常时使用的信息返回前端。被包裹的原始异常信息记录进入日志即可
-		writeActionBizError(response, bex.getMineMessage());
+		writeJSON(response, ActionResultHelper.bizError(bex));
 	}
 	public static void writeActionBizError(HttpServletResponse response, ActionResult ar) {
 		writeJSON(response, ar);

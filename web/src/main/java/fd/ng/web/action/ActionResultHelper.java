@@ -1,6 +1,7 @@
 package fd.ng.web.action;
 
 import fd.ng.core.exception.BusinessProcessException;
+import fd.ng.core.exception.BusinessSystemException;
 import fd.ng.core.exception.internal.FrameworkRuntimeException;
 import fd.ng.core.utils.JsonUtil;
 import fd.ng.core.utils.StringUtil;
@@ -17,9 +18,21 @@ public class ActionResultHelper {
 		if(errorMsg==null) errorMsg = ActionResultEnum.BIZ_ERROR.getMessage();
 		return new ActionResult(ActionResultEnum.BIZ_ERROR.getCode(), errorMsg);
 	}
+	public static ActionResult bizError(BusinessSystemException bex) {
+		if(bex==null) {
+			throw new FrameworkRuntimeException("Exception can not be null!");
+		}
+
+		// 只把构造这个异常时使用的信息返回前端。被包裹的原始异常信息记录进入日志即可
+		String forFrontMsg = bex.getMineMessage(); // 获得用户构造这个异常时，明确指定的错误信息。
+		if(forFrontMsg==null) forFrontMsg = ActionResultEnum.BIZ_ERROR.getMessage();
+		forFrontMsg += " | " + bex.getErrorCode(); // 追加上错误代码。如果该异常被记入日志，可以用这个代码快速定位
+
+		return new ActionResult(ActionResultEnum.BIZ_ERROR.getCode(), forFrontMsg);
+	}
 	public static ActionResult bizError(BusinessProcessException bex) {
 		if(bex==null) {
-			throw new FrameworkRuntimeException("BusinessException can not be null!");
+			throw new FrameworkRuntimeException("Exception can not be null!");
 		}
 		if(bex.isNullCode()) return new ActionResult(ActionResultEnum.BIZ_ERROR.getCode(), bex.getMessage());
 		else {

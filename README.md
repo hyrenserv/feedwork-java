@@ -1,5 +1,5 @@
 # feedwork
-## 一、使用样例
+# 一、使用样例
 ### 假设有如下HTML页面：
 ![page](https://github.com/hyrenserv/resources/raw/master/feedwork-java/images/page-show.png)
 ### 其HTML代码如下：
@@ -16,7 +16,7 @@
 /web/src/test/java/fd/ng/web/hmfmswebapp/a0101/UserManagerActionTest.java
 ```
 
-## 二、搭建新项目的步骤
+# 二、搭建新项目的步骤
 
 - 新建 Gradle java 工程（不需要任何和Web相关的插件）
 - 给工程新建 Module
@@ -73,7 +73,7 @@
     ```
     - (5) 在biz包下，编写具体业务处理的代码
 
-## 三、功能介绍
+# 三、功能介绍
 
 ## 1. Action
 
@@ -202,7 +202,21 @@ public class SomeTestSuite {
 }
 ```
 
-## 三、Howto
+## 3. 异常处理
+自动生成的代码骨架中，提供两个异常：BusinessException 和 AppSystemException
+
+|  | BusinessException | AppSystemException |
+| ------- | ---------- | ---------- |
+| 使用场合 | Action类的业务方法中 | 当需要try...catch时，在catch中，对发生的异常进行再包裹后抛出 |
+| 注意事项 | __没有异常堆栈__ ！！！ | 就是 RuntimeException |
+| 附加特性 | 自动把异常信息写入日志中 | 只把构造这个异常时使用的信息返回前端，被包裹的原始异常信息记入日志。  会自动生成一个全局唯一的错误代码同时返回前端并记入日志 |
+| 附加特性 | 支持给抛出的异常设置数字代码 | NA |
+| 附加特性 | 支持使用错误分类枚举的方式抛出异常 | NA |
+| 附加特性 | 支持从i18n配置文件中读取数据 | NA - 可参照BusinessProcessException改造其父类以支持i18n |
+| 性能考虑 | 性能极其优异 | 和各种JAVA异常类一样的性能 |
+
+
+# 四、Howto
 
 ### - 跨域支持
 

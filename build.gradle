@@ -62,7 +62,8 @@ subprojects {
         compile group: 'org.slf4j', name: 'log4j-over-slf4j', version: '1.7.25'
         compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
         compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.2'
-        compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
+        compile group: 'com.alibaba', name: 'fastjson', version: '1.2.58'
+
 
         testCompile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
         testCompile "commons-lang:commons-lang:2.6"
@@ -79,6 +80,7 @@ subprojects {
         testCompile group: 'mysql', name: 'mysql-connector-java', version: '5.1.47'
         testCompile project(':testing')
         compile group: 'com.univocity', name: 'univocity-parsers', version: '2.8.2'
+        compile group: 'org.postgresql', name: 'postgresql', version: '9.4.1212'
     }
 
     def moduleRootPackagePrefix = "$project.group.$project.name"

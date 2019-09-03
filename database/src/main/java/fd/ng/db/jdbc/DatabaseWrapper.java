@@ -27,6 +27,7 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 	private final boolean lazyConnect;
 	private final DbinfosConf.Dbinfo dbinfo; // db配置
 	private final String id; // 代表当前db对象，（比如，WEB类应用如果有自己的id可传入）
+	private final String traceId; // 打印到日志里面的id标识： id-name
 	private final String desc; // 对当前db对象的详细描述
 	private boolean autoCommit; // 是否自动提交事务，同时也代表是否启动了事务（为false表示启动了事务）
 	/**
@@ -93,8 +94,11 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 
 		if(dbinfo==null)
 			throw new DBException(this.id, "Can not get database conf info by name : " + builder.dbname);
-		else if(logger.isTraceEnabled())
-			logger.trace("{} used database conf : {}", this.id, this.dbinfo.toString());
+
+		this.traceId = this.id+"-DB-"+this.dbinfo.getName();
+
+		if(logger.isTraceEnabled())
+			logger.trace("{} used database conf : {}", this.traceId, this.dbinfo.toString());
 
 		if(!this.lazyConnect) {
 			setupConnection();
@@ -131,7 +135,7 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 		if(this.connected) return;
 		try {
 			if(this.conn!=null) {
-				logger.trace("DB:{}-{} reUse  autoCommit={}", this.getName(), this.id, this.conn.getAutoCommit());
+				logger.trace("{} reUse  autoCommit={}", this.traceId, this.conn.getAutoCommit());
 				return;
 			}
 			long start = 0;
@@ -149,13 +153,13 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 				javax.sql.DataSource ds = (javax.sql.DataSource)initialcontext.lookup(this.dbinfo.getUrl());
 				conn = ds.getConnection();
 			} else {
-				throw new DBException(this.id, " Unsupported connection way : " + dbinfo.getWay());
+				throw new DBException(this.traceId, " Unsupported connection way : " + dbinfo.getWay());
 			}
 			if(logger.isInfoEnabled())
-				logger.info("DB:{}-{} NewDB by {} {} AutoCommit {} -> {}",
-						this.getName(), this.id, this.dbinfo.getWay(), this.desc, this.conn.getAutoCommit(), this.autoCommit);
+				logger.info("{} NewDB by {} {} AutoCommit {} -> {}",
+						this.traceId, this.dbinfo.getWay(), this.desc, this.conn.getAutoCommit(), this.autoCommit);
 			if(dbinfo.isShow_conn_time()) {
-				logger.info("DB:{}-{} make  connection time : {}ms", this.getName(), this.id, (System.currentTimeMillis()-start));
+				logger.info("{} make  connection time : {}ms", this.traceId, (System.currentTimeMillis()-start));
 			}
 			this.connected = true;
 			if(this.autoCommit)
@@ -174,7 +178,7 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 	 * @return int 该update sql产生的DB变化数量
 	 */
 	public int execute(final String sql, Object... params) {
-		if(!this.connected) throw new DBException(this.id, "no connection!");
+		if(!this.connected) throw new DBException(this.traceId, "no connection!");
 		try {
 			if(isBeginTrans()) this.updatingInTrans = true;
 			PreparedStatement curPstmt = getPreparedStatement(sql, false);
@@ -183,12 +187,12 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 			if(this.dbinfo.isShow_sql_time()) start = System.currentTimeMillis();
 			int nums = curPstmt.executeUpdate();
 			if(this.showsql&&logger.isInfoEnabled())
-				logger.info("DB:{}-{} ExecU sql : [ {} ]", this.getName(), this.id, getGoodshowSql(-1, -1, sql, params));
+				logger.info("{} ExecU sql : [ {} ]", this.traceId, getGoodshowSql(-1, -1, sql, params));
 			if(this.dbinfo.isShow_sql_time()) {
 				long end = System.currentTimeMillis();
 				long et = end - start;
 				if( et>this.dbinfo.getLongtime_sql() )
-					logger.warn("DB:{}-{} [LONGTIME SQL(EXECUTE)] elapse time {}ms, sql=[ {} ]", this.getName(), this.id, et, sql);
+					logger.warn("{} [LONGTIME SQL(EXECUTE)] elapse time {}ms, sql=[ {} ]", this.traceId, et, sql);
 			}
 			return nums;
 		} catch (SQLException e) {
@@ -203,7 +207,7 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 	 * @return int[] 每一个值代表 paramsList 中相应下标的数据提交的DB更新结果数量
 	 */
 	public int[] execBatch(final String sql, List<Object[]> paramsList) {
-		if(!this.connected) throw new DBException(this.id, "no connection!");
+		if(!this.connected) throw new DBException(this.traceId, "no connection!");
 		try {
 			if(isBeginTrans()) this.updatingInTrans = true;
 			PreparedStatement curPstmt = getPreparedStatement(sql, false);
@@ -217,13 +221,13 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 			if(this.dbinfo.isShow_sql_time()) start = System.currentTimeMillis();
 			int[] nums = curPstmt.executeBatch();
 			if(this.showsql&&logger.isInfoEnabled())
-				logger.info("DB:{}-{} ExecB batch sql : [ {} ], params : {}, {} ... ... params.size={}", this.getName(), this.id,
+				logger.info("{} ExecB batch sql : [ {} ], params : {}, {} ... ... params.size={}", this.traceId,
 						sql, Arrays.toString(paramsList.get(0)), Arrays.toString(paramsList.get(1)), size);
 			if(this.dbinfo.isShow_sql_time()) {
 				long end = System.currentTimeMillis();
 				long et = end - start;
 				if( et>this.dbinfo.getLongtime_sql() )
-					logger.warn("DB:{}-{} [LONGTIME SQL(EXECUTE BATCH)] elapse time {}ms, sql=[ {} ]", this.getName(), this.id, et, sql);
+					logger.warn("{} [LONGTIME SQL(EXECUTE BATCH)] elapse time {}ms, sql=[ {} ]", this.traceId, et, sql);
 			}
 			return nums;
 		} catch (SQLException e) {
@@ -243,7 +247,7 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 	 * @return
 	 */
 	public <T> T query(final String sql, ResultSetProcessor<T> rsProcessor, Object... params) {
-		if(!this.connected) throw new DBException(this.id, "no connection!");
+		if(!this.connected) throw new DBException(this.traceId, "no connection!");
 		ResultSet rs = queryGetResultSet(sql, params);
 		try {
 			T obj = rsProcessor.handle(rs);
@@ -262,7 +266,7 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 	 * @return ResultSet
 	 */
 	public ResultSet queryGetResultSet(final String sql, Object... params) {
-		if(!this.connected) throw new DBException(this.id, "no connection!");
+		if(!this.connected) throw new DBException(this.traceId, "no connection!");
 		ResultSet rs = null;
 		try {
 			rs = doQueryGetResultSet(sql, 0, 0, false, params);
@@ -277,7 +281,7 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 		return queryPaged(sql, begin, end, true, rsProcessor, params);
 	}
 	public <T> T queryPaged(final String sql, int begin, int end, boolean isCountTotal, ResultSetProcessor<T> rsProcessor, Object... params) {
-		if(!this.connected) throw new DBException(this.id, "no connection!");
+		if(!this.connected) throw new DBException(this.traceId, "no connection!");
 		ResultSet rs = queryPagedGetResultSet(sql, begin, end, isCountTotal, params);
 		try {
 			T obj = rsProcessor.handle(rs);
@@ -310,14 +314,14 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 	 * @return
 	 */
 	public ResultSet queryPagedGetResultSet(String sql, int begin, int end, boolean isCountTotal, Object... params) {
-		if(!this.connected) throw new DBException(this.id, "no connection!");
+		if(!this.connected) throw new DBException(this.traceId, "no connection!");
 		if(isCountTotal) {
 			String count_sql = getDbtype().ofCountSql(sql);
 			try(ResultSet rs = doQueryGetResultSet(count_sql, 0, 0, false, params)) {
 				if(rs.next()) {
 					this.countsInPagedQuery = rs.getInt(1);
 				} else {
-					throw new DBException(this.id, "sql exception. sql : " + count_sql);
+					throw new DBException(this.traceId, "sql exception. sql : " + count_sql);
 				}
 			} catch (SQLException e) {
 				throw this.reSQLException(e, count_sql, params);
@@ -338,7 +342,7 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 	private ResultSet doQueryGetResultSet(final String sql, int begin, int end, boolean isPaged, Object... params) throws SQLException {
 		PreparedStatement curPstmt = getPreparedStatement(sql, true);
 		if(logger.isTraceEnabled()) {
-			logger.trace("{} autoCommit={}, fetchSize={}, fetchDirection={}", this.id,
+			logger.trace("{} autoCommit={}, fetchSize={}, fetchDirection={}", this.traceId,
 					conn.getAutoCommit(), curPstmt.getFetchSize(), curPstmt.getFetchDirection());
 		}
 		int pstmtIndex = fillStatementParameters(0, curPstmt, params);
@@ -354,15 +358,15 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 		ResultSet rs = curPstmt.executeQuery();
 		if(this.showsql&&logger.isInfoEnabled()) {
 			if(isPaged)
-				logger.info("DB:{}-{} Query sql : [ {} ]", this.getName(), this.id, getGoodshowSql(begin, end, sql, params));
+				logger.info("{} Query sql : [ {} ]", this.traceId, getGoodshowSql(begin, end, sql, params));
 			else
-				logger.info("DB:{}-{} Query sql : [ {} ]", this.getName(), this.id, getGoodshowSql(-1, -1, sql, params));
+				logger.info("{} Query sql : [ {} ]", this.traceId, getGoodshowSql(-1, -1, sql, params));
 		}
 		if(this.dbinfo.isShow_sql_time()) {
 			long endTime = System.currentTimeMillis();
 			long et = endTime - startTime;
 			if( et>this.dbinfo.getLongtime_sql() )
-				logger.warn("DB:{}-{} [LONGTIME SQL(SELECT)] elapse time {}ms, sql=[ {} ]", this.getName(), this.id, et, sql);
+				logger.warn("{} [LONGTIME SQL(SELECT)] elapse time {}ms, sql=[ {} ]", this.traceId, et, sql);
 		}
 		return rs;
 	}
@@ -391,11 +395,11 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 	public <T> T assembleResultSet(ResultSet rs, ResultSetProcessor<T> rsProcessor, boolean isCloseResultSet) {
 		Validator.notNull(rs, "Null ResultSet");
 		Validator.notNull(rsProcessor, "Null ResultSetProcessor");
-		if(!this.connected) throw new DBException(this.id, "no connection!");
+		if(!this.connected) throw new DBException(this.traceId, "no connection!");
 		try {
 			return rsProcessor.handle(rs);
 		} catch (SQLException e) {
-			throw new DBException(this.id, e);
+			throw new DBException(this.traceId, e);
 		} finally {
 			if(isCloseResultSet)
 				try{ if(rs!=null) rs.close(); } catch (SQLException e) { logger.warn(e); }
@@ -408,13 +412,13 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 	 * @return
 	 */
 	public int ExecDDL(String sql) {
-		if(!this.connected) throw new DBException(this.id, "no connection!");
+		if(!this.connected) throw new DBException(this.traceId, "no connection!");
 		try( Statement stmt = this.conn.createStatement() ) {
 			int num = stmt.executeUpdate(sql);
-			logger.info("DB:{}-{} doDDL sql : {}", this.getName(), this.id, sql);
+			logger.info("{} doDDL sql : {}", this.traceId, sql);
 			return num;
 		} catch (Exception e) {
-			throw new DBException(this.id, this.getName()+"-"+this.id + " ddl failed! sql : " + sql, e);
+			throw new DBException(this.traceId, "ddl failed! sql : " + sql, e);
 		}
 	}
 
@@ -422,7 +426,7 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 		if(!this.connected) return;
 		if(isBeginTrans()){
 			if(logger.isTraceEnabled())
-				logger.trace("DB:{}-{} Trans already begin.", this.getName(), this.id);
+				logger.trace("{} Trans already begin.", this.traceId);
 			return;
 		}
 		try{
@@ -431,9 +435,9 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 			this.beginTrans = true;
 			this.beginCount++;
 			if(this.showsql&&logger.isInfoEnabled())
-				logger.info("DB:{}-{} Trans begin successful", this.getName(), this.id);
+				logger.info("{} Trans begin successful", this.traceId);
 		} catch(Exception e){
-			throw new DBException(this.id, this.getName()+"-"+this.id + " beginTrans fail!", e);
+			throw new DBException(this.traceId, "beginTrans fail!", e);
 		}
 	}
 	public void commit() {
@@ -445,13 +449,13 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 				this.commitCount++;
 				this.updatingInTrans = false;
 				if(this.showsql&&logger.isInfoEnabled())
-					logger.info("DB:{}-{} Trans commit", this.getName(), this.id);
+					logger.info("{} Trans commit", this.traceId);
 			}
 //			else {
-//				logger.warn("DB:{}-{} Trans 没有开启事务，无法执行事务提交操作", this.id);
+//				logger.warn("{} Trans 没有开启事务，无法执行事务提交操作", this.traceId);
 //			}
 		}catch(Exception e){
-			throw new DBException(this.id, this.getName()+"-"+this.id + " commit fail!", e);
+			throw new DBException(this.traceId, "commit fail!", e);
 		}
 	}
 	public void rollback() {
@@ -463,13 +467,13 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 				this.rollbackCount++;
 				this.updatingInTrans = false;
 				if(this.showsql&&logger.isInfoEnabled())
-					logger.info("DB:{}-{} Trans rollback", this.getName(), this.id);
+					logger.info("{} Trans rollback", this.traceId);
 			}
 //			else {
-//				logger.warn("DB:{}-{} Trans 没有开启事务，无法执行事务回滚操作", this.id);
+//				logger.warn("{} Trans 没有开启事务，无法执行事务回滚操作", this.traceId);
 //			}
 		}catch(Exception e){
-			throw new DBException(this.id, "rollback fail!", e);
+			throw new DBException(this.traceId, "rollback fail!", e);
 		}
 	}
 
@@ -482,28 +486,28 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 			}
 			pstmtBox.clear();
 		}catch(Exception e){
-			logger.error(this.getName()+"-"+this.id + " clear PrepStatement failed", e);
+			logger.error(this.traceId + " clear PrepStatement failed", e);
 		}
 		try { // 清理未完成的事务
 			if(isUpdatingInTrans()) {
 				// 开始了事务，但是直到关闭，既没有提交事务，也没有回滚事务。
 //				if(isBeginTrans()&&!isCommit()&&!isRollback())
 				{
-					logger.error("DB:{}-{} Trans has unhandled, auto rollback before close", this.getName(), this.id);
+					logger.error("{} Trans has unhandled, auto rollback before close", this.traceId);
 					this.conn.rollback();
 				}
 			}
 		} catch (Exception e) {
-			logger.error(this.getName()+"-"+this.id + " rollback failed in db.close()", e);
+			logger.error(this.traceId + " rollback failed in db.close()", e);
 		}
 		try{ // 关闭连接
 			if(this.conn!=null&&!this.conn.isClosed()){
 				this.conn.close();
 				this.connected = false;
-				logger.info("DB:{}-{} Close ", this.getName(), this.id);
+				logger.info("{} Close ", this.traceId);
 			}
 		} catch(Exception e) {
-			throw new DBException(this.id, "close connection failed", e);
+			throw new DBException(this.traceId, "close connection failed", e);
 		}
 	}
 
@@ -531,7 +535,7 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 					return false;
 			}
 		} catch (SQLException e) {
-			throw new DBException(this.id, "ExistCheck table '"+tableName+"' failed", e);
+			throw new DBException(this.traceId, "ExistCheck table '"+tableName+"' failed", e);
 		} finally {
 			try{ if(rsThis!=null) rsThis.close(); }catch(Exception e){}
 		}
@@ -561,8 +565,8 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(this.getName()).append("-").append(this.id);
-		if(StringUtil.isNotEmpty(this.desc)) sb.append("-").append(desc);
+		sb.append(this.traceId);
+		if(StringUtil.isNotEmpty(this.desc)) sb.append(" (").append(desc).append(')');
 		sb.append(" : ");
 
 		if(this.conn==null) { // lazy方式创建DB时

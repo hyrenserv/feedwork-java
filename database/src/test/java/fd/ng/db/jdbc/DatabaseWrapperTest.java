@@ -97,7 +97,7 @@ public class DatabaseWrapperTest extends DbBaseTestCase {
 		dbinfo.setDriver("com.mysql.jdbc.Driver");
 		dbinfo.setUrl("jdbc:mysql://localhost:3306/xxx?useCursorFetch:true");
 		dbinfo.setUsername("root");
-		dbinfo.setPassword("");
+		dbinfo.setPassword("xxx123");
 		dbinfo.setWay(ConnWay.JDBC);
 		dbinfo.setDbtype(Dbtype.MYSQL);
 		dbinfo.setShow_conn_time(true);

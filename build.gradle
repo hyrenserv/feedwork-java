@@ -97,6 +97,9 @@ subprojects {
     // 仅仅用于在做feedwork开发测试时，把jar包拷贝到另外的测试工程中
     task copyJars(type: Copy, dependsOn: [jar]) {
         def toRootDir = "D:\\java\\app\\intellij2018\\example\\libs"
+        if (project.hasProperty('toDir')) {       // 执行 gradle copyJars -PtoDir=...
+            toRootDir = project.property('toDir')
+        }
         if( project.name=="testing" ) {
             println "copy jars from [$project.name] to testcase"
             from "${buildDir}/libs"

@@ -11,21 +11,21 @@ import java.util.Optional;
 
 public class WebBaseTestCase extends FdBaseTestCase {
 	protected String getHost() {
-		return (StringUtil.isBlank(HttpServerConf.Host)?"localhost": HttpServerConf.Host);
+		return (StringUtil.isBlank(HttpServerConf.confBean.Host)?"localhost": HttpServerConf.confBean.Host);
 	}
 	protected String getPort() {
-		return String.valueOf(HttpServerConf.HttpPort);
+		return String.valueOf(HttpServerConf.confBean.HttpPort);
 	}
 	protected String getHostPort() {
-		String ActionPattern = HttpServerConf.ActionPattern;
+		String ActionPattern = HttpServerConf.confBean.ActionPattern;
 		if(ActionPattern.endsWith("/*")) ActionPattern = ActionPattern.substring(0, ActionPattern.length()-2);
 		return "http://"+ getHost()	+ ":" + getPort();
 	}
 	protected String getUrlCtx() {
-		return getHostPort() + HttpServerConf.WebContext;
+		return getHostPort() + HttpServerConf.confBean.WebContext;
 	}
 	protected String getUrlActionPattern() {
-		String ActionPattern = HttpServerConf.ActionPattern;
+		String ActionPattern = HttpServerConf.confBean.ActionPattern;
 		if(ActionPattern.endsWith("/*")) ActionPattern = ActionPattern.substring(0, ActionPattern.length()-2);
 		return getUrlCtx() + ActionPattern;
 	}

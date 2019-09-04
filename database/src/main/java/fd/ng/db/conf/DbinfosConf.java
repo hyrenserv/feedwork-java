@@ -1,5 +1,6 @@
 package fd.ng.db.conf;
 
+import fd.ng.core.conf.AppinfoConf;
 import fd.ng.core.conf.ConfFileLoader;
 import fd.ng.core.exception.internal.FrameworkRuntimeException;
 import fd.ng.core.yaml.*;
@@ -21,123 +22,132 @@ public class DbinfosConf {
 	public static final List<String> dbNames; // 唯一的作用就是避免从Databases的keySet取所有名字时无法提前知道总数。
 
 	static {
-		YamlMap rootConfig = YamlFactory.load(ConfFileLoader.getConfFile("dbinfo")).asMap();
-
-		// 加载全局属性
-		globalConf = new DbinfosConf.Global();
-		YamlMap global = rootConfig.getMap("global");
-		if(global!=null) {
-			if(global.exist("fetch_size")) globalConf.setFetch_size(global.getInt("fetch_size"));
-			if(global.exist("max_rows")) globalConf.setMax_rows(global.getInt("max_rows"));
-			if(global.exist("fetch_direction")) globalConf.setFetch_direction(global.getInt("fetch_direction"));
-			if(global.exist("query_timeout")) globalConf.setQuery_timeout(global.getInt("query_timeout"));
-
-			if(global.exist("max_result_rows")) globalConf.setMax_result_rows(global.getInt("max_result_rows"));
-			if(global.exist("show_sql")) globalConf.setShow_sql(global.getBool("show_sql"));
-			if(global.exist("show_conn_time")) globalConf.setShow_conn_time(global.getBool("show_conn_time"));
-			if(global.exist("show_sql_time")) globalConf.setShow_sql_time(global.getBool("show_sql_time"));
-			if(global.exist("longtime_sql")) globalConf.setLongtime_sql(global.getLong("longtime_sql"));
+		if(!AppinfoConf.HasDatabase) {
+			globalConf = null;
+			Dbinfos = Collections.emptyMap();
+			DATA_SOURCE = Collections.emptyMap();
+			dbNames = Collections.emptyList();
 		}
+		else {
+			YamlMap rootConfig = YamlFactory.load(ConfFileLoader.getConfFile("dbinfo")).asMap();
 
-		// 加载每个数据的属性
-		YamlArray databases = rootConfig.getArray("databases");
-		if(databases==null) {
-			// 出现这个异常，一般是开发环境中改了需要这个文件的程序，导致无法静态加载。因为静态加载是编译阶段。
-			// 所以，最简单的方式就是全部重新编译整个工程即可
-			throw new FrameworkRuntimeException("\nCan not found dbinfo.conf, Or, missing key [ databases ] in dbinfo.conf!" +
-					"\nFor fix this problem:" +
-					"\nIn dev        time: Rebuild whole project" +
-					"\nIn production time: Restart yours application");
-		}
-		Map<String, Dbinfo> __Databases = new HashMap<>(databases.size());
-		Map<String, DataSource> __DATA_SOURCE = new HashMap<>(databases.size());
-		List<String> dbNameList = new ArrayList<>(databases.size());
-		for(int i=0; i<databases.size(); i++) {
-			YamlMap dbconf = databases.getMap(i);
-			if(dbconf.getBool("disable", false)) continue;
+			// 加载全局属性
+			globalConf = new DbinfosConf.Global();
+			YamlMap global = rootConfig.getMap("global");
+			if (global != null) {
+				if (global.exist("fetch_size")) globalConf.setFetch_size(global.getInt("fetch_size"));
+				if (global.exist("max_rows")) globalConf.setMax_rows(global.getInt("max_rows"));
+				if (global.exist("fetch_direction")) globalConf.setFetch_direction(global.getInt("fetch_direction"));
+				if (global.exist("query_timeout")) globalConf.setQuery_timeout(global.getInt("query_timeout"));
 
-			Dbinfo dbconfObject = new Dbinfo();
-
-			String name = dbconf.getString("name");
-			if(__Databases.containsKey(name)) throw new FrameworkRuntimeException("databases : name="+name+" already exists !");
-			dbconfObject.setName(name);
-
-			Dbtype dbtype = dbconf.getEnum(Dbtype.class, "dbtype");
-			dbconfObject.setDbtype(dbtype);
-
-			dbconfObject.setDriver(dbconf.getString("driver"));
-			dbconfObject.setUrl(dbconf.getString("url"));
-			dbconfObject.setUsername(dbconf.getString("username"));
-			dbconfObject.setPassword(dbconf.getString("password"));
-
-			dbconfObject.setAutoCommit(dbconf.getBool("autoCommit", true));
-
-			ConnWay way = dbconf.getEnum(ConnWay.class, "way");
-			dbconfObject.setWay(way);
-			if(way==ConnWay.POOL) {
-				// 池大小参数
-				int minPoolSize = dbconf.getInt("minPoolSize", 5);
-				int maxPoolSize = dbconf.getInt("maxPoolSize", 5);
-				if(DEFAULT_DBNAME.equals(name)) { // 如果是默认连接，并且没有设置最大或最小，那么分别设置为10和20
-					if(!dbconf.exist("minPoolSize")) minPoolSize = 10;
-					if(!dbconf.exist("maxPoolSize")) minPoolSize = 20;
-				}
-				dbconfObject.setMinPoolSize(minPoolSize);
-				dbconfObject.setMaxPoolSize(maxPoolSize);
-
-				if(dbconf.exist("properties")) {
-					YamlArray properties = dbconf.getArray("properties");
-					for(int j=0; j<properties.size(); j++) {
-						String line = properties.getString(j);
-						YamlMapAnywhere oneProp = (YamlMapAnywhere)YamlFactory.getYamlReader(line).asMap();
-						for(final YamlNode key : oneProp.keys()) {
-							String keyName = ((Scalar)key).value();
-							String val = oneProp.getString(keyName);
-							dbconfObject.addProperty(keyName, val);
-						}
-					}
-				}
-
-				__DATA_SOURCE.put(name, DefaultDataSource.getDataSource( dbconfObject));
+				if (global.exist("max_result_rows")) globalConf.setMax_result_rows(global.getInt("max_result_rows"));
+				if (global.exist("show_sql")) globalConf.setShow_sql(global.getBool("show_sql"));
+				if (global.exist("show_conn_time")) globalConf.setShow_conn_time(global.getBool("show_conn_time"));
+				if (global.exist("show_sql_time")) globalConf.setShow_sql_time(global.getBool("show_sql_time"));
+				if (global.exist("longtime_sql")) globalConf.setLongtime_sql(global.getLong("longtime_sql"));
 			}
 
-			// 设置通用属性
-			if(dbconf.exist("fetch_size")) dbconfObject.setFetch_size(dbconf.getInt("fetch_size"));
-			else dbconfObject.setFetch_size(globalConf.getFetch_size());
-			if(dbconf.exist("max_rows")) dbconfObject.setMax_rows(dbconf.getInt("max_rows"));
-			else dbconfObject.setMax_rows(globalConf.getMax_rows());
-			if(dbconf.exist("fetch_direction")) dbconfObject.setFetch_direction(dbconf.getInt("fetch_direction"));
-			else dbconfObject.setFetch_direction(globalConf.getFetch_direction());
-			if(dbconf.exist("query_timeout")) dbconfObject.setQuery_timeout(dbconf.getInt("query_timeout"));
-			else dbconfObject.setQuery_timeout(globalConf.getQuery_timeout());
+			// 加载每个数据的属性
+			YamlArray databases = rootConfig.getArray("databases");
+			if (databases == null) {
+				// 出现这个异常，一般是开发环境中改了需要这个文件的程序，导致无法静态加载。因为静态加载是编译阶段。
+				// 所以，最简单的方式就是全部重新编译整个工程即可
+				throw new FrameworkRuntimeException("\nCan not found dbinfo.conf, Or, missing key [ databases ] in dbinfo.conf!" +
+						"\nFor fix this problem:" +
+						"\nIn dev        time: Rebuild whole project" +
+						"\nIn production time: Restart yours application");
+			}
+			Map<String, Dbinfo> __Databases = new HashMap<>(databases.size());
+			Map<String, DataSource> __DATA_SOURCE = new HashMap<>(databases.size());
+			List<String> dbNameList = new ArrayList<>(databases.size());
+			for (int i = 0; i < databases.size(); i++) {
+				YamlMap dbconf = databases.getMap(i);
+				if (dbconf.getBool("disable", false)) continue;
 
-			if(dbconf.exist("max_result_rows")) dbconfObject.setMax_result_rows(dbconf.getInt("max_result_rows"));
-			else dbconfObject.setMax_result_rows(globalConf.getMax_result_rows());
-			if(dbconf.exist("show_sql")) dbconfObject.setShow_sql(dbconf.getBool("show_sql"));
-			else dbconfObject.setShow_sql(globalConf.show_sql());
-			if(dbconf.exist("show_conn_time")) dbconfObject.setShow_conn_time(dbconf.getBool("show_conn_time"));
-			else dbconfObject.setShow_conn_time(globalConf.isShow_conn_time());
-			if(dbconf.exist("show_sql_time")) dbconfObject.setShow_sql_time(dbconf.getBool("show_sql_time"));
-			else dbconfObject.setShow_sql_time(globalConf.isShow_sql_time());
-			if(dbconf.exist("longtime_sql")) dbconfObject.setLongtime_sql(dbconf.getLong("longtime_sql"));
-			else dbconfObject.setLongtime_sql(globalConf.getLongtime_sql());
+				Dbinfo dbconfObject = new Dbinfo();
 
-			/** 各个参数的相关性检查 */
+				String name = dbconf.getString("name");
+				if (__Databases.containsKey(name))
+					throw new FrameworkRuntimeException("databases : name=" + name + " already exists !");
+				dbconfObject.setName(name);
+
+				Dbtype dbtype = dbconf.getEnum(Dbtype.class, "dbtype");
+				dbconfObject.setDbtype(dbtype);
+
+				dbconfObject.setDriver(dbconf.getString("driver"));
+				dbconfObject.setUrl(dbconf.getString("url"));
+				dbconfObject.setUsername(dbconf.getString("username"));
+				dbconfObject.setPassword(dbconf.getString("password"));
+
+				dbconfObject.setAutoCommit(dbconf.getBool("autoCommit", true));
+
+				ConnWay way = dbconf.getEnum(ConnWay.class, "way");
+				dbconfObject.setWay(way);
+				if (way == ConnWay.POOL) {
+					// 池大小参数
+					int minPoolSize = dbconf.getInt("minPoolSize", 5);
+					int maxPoolSize = dbconf.getInt("maxPoolSize", 5);
+					if (DEFAULT_DBNAME.equals(name)) { // 如果是默认连接，并且没有设置最大或最小，那么分别设置为10和20
+						if (!dbconf.exist("minPoolSize")) minPoolSize = 10;
+						if (!dbconf.exist("maxPoolSize")) minPoolSize = 20;
+					}
+					dbconfObject.setMinPoolSize(minPoolSize);
+					dbconfObject.setMaxPoolSize(maxPoolSize);
+
+					if (dbconf.exist("properties")) {
+						YamlArray properties = dbconf.getArray("properties");
+						for (int j = 0; j < properties.size(); j++) {
+							String line = properties.getString(j);
+							YamlMapAnywhere oneProp = (YamlMapAnywhere) YamlFactory.getYamlReader(line).asMap();
+							for (final YamlNode key : oneProp.keys()) {
+								String keyName = ((Scalar) key).value();
+								String val = oneProp.getString(keyName);
+								dbconfObject.addProperty(keyName, val);
+							}
+						}
+					}
+
+					__DATA_SOURCE.put(name, DefaultDataSource.getDataSource(dbconfObject));
+				}
+
+				// 设置通用属性
+				if (dbconf.exist("fetch_size")) dbconfObject.setFetch_size(dbconf.getInt("fetch_size"));
+				else dbconfObject.setFetch_size(globalConf.getFetch_size());
+				if (dbconf.exist("max_rows")) dbconfObject.setMax_rows(dbconf.getInt("max_rows"));
+				else dbconfObject.setMax_rows(globalConf.getMax_rows());
+				if (dbconf.exist("fetch_direction")) dbconfObject.setFetch_direction(dbconf.getInt("fetch_direction"));
+				else dbconfObject.setFetch_direction(globalConf.getFetch_direction());
+				if (dbconf.exist("query_timeout")) dbconfObject.setQuery_timeout(dbconf.getInt("query_timeout"));
+				else dbconfObject.setQuery_timeout(globalConf.getQuery_timeout());
+
+				if (dbconf.exist("max_result_rows")) dbconfObject.setMax_result_rows(dbconf.getInt("max_result_rows"));
+				else dbconfObject.setMax_result_rows(globalConf.getMax_result_rows());
+				if (dbconf.exist("show_sql")) dbconfObject.setShow_sql(dbconf.getBool("show_sql"));
+				else dbconfObject.setShow_sql(globalConf.show_sql());
+				if (dbconf.exist("show_conn_time")) dbconfObject.setShow_conn_time(dbconf.getBool("show_conn_time"));
+				else dbconfObject.setShow_conn_time(globalConf.isShow_conn_time());
+				if (dbconf.exist("show_sql_time")) dbconfObject.setShow_sql_time(dbconf.getBool("show_sql_time"));
+				else dbconfObject.setShow_sql_time(globalConf.isShow_sql_time());
+				if (dbconf.exist("longtime_sql")) dbconfObject.setLongtime_sql(dbconf.getLong("longtime_sql"));
+				else dbconfObject.setLongtime_sql(globalConf.getLongtime_sql());
+
+				/** 各个参数的相关性检查 */
 //				if(dbconfObject.getFetch_size()>0&&dbconfObject.getMax_result_rows()>0) {
 //					if( dbconfObject.getFetch_size()>dbconfObject.getMax_result_rows() ) {
 //						logger.warn("Fix fetch_size(={}) by max_result_rows(={})", dbconfObject.getFetch_size(), dbconfObject.getMax_result_rows());
 //						dbconfObject.setFetch_size(dbconfObject.getMax_result_rows());
 //					}
 //				}
-			__Databases.put(name, dbconfObject);
-			dbNameList.add(name);
+				__Databases.put(name, dbconfObject);
+				dbNameList.add(name);
+			}
+			if (!__Databases.containsKey(DEFAULT_DBNAME)) {
+				throw new FrameworkRuntimeException("There must be one 'name : default' item in 'databases' !");
+			}
+			DATA_SOURCE = Collections.unmodifiableMap(__DATA_SOURCE);
+			Dbinfos = Collections.unmodifiableMap(__Databases);
+			dbNames = Collections.unmodifiableList(dbNameList);
 		}
-		if(!__Databases.containsKey(DEFAULT_DBNAME)) {
-			throw new FrameworkRuntimeException("There must be one 'name : default' item in 'databases' !");
-		}
-		DATA_SOURCE = Collections.unmodifiableMap(__DATA_SOURCE);
-		Dbinfos = Collections.unmodifiableMap(__Databases);
-		dbNames = Collections.unmodifiableList(dbNameList);
 	}
 
 	public static Dbinfo getDatabase(String name) {

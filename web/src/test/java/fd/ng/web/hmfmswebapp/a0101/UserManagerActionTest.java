@@ -120,7 +120,13 @@ public class UserManagerActionTest extends WebBaseTestCase {
 				.getBodyString();
 
 		String ar = JsonUtil.getNodeValue(responseValue, "data");
-		assertThat(ar, containsString("{\"name\":\"李四\",\"age\":99,\"sex\":\"男\",\"favors\":[\"xxx\",\"yyy\"],\"amt\":234.99,\"wife\":{\"husbandName\":\"李四\",\"age\":99,\"sex\":\"男\"}}"));
+		assertThat(ar, allOf( containsString("\"person\":"),
+				containsString("\"name\":\"李四\""),
+				containsString("\"age\":99"),
+				containsString("\"sex\":\"男\""),
+				containsString("\"favors\":[\"xxx\",\"yyy\"]"),
+				containsString("\"amt\":234.99"),
+				containsString("\"wife\":")));
 
 		Person person = JsonUtil.toObjectByNodeName(ar, "person", Person.class);
 		assertThat(person.getName(), is("李四"));
@@ -135,23 +141,23 @@ public class UserManagerActionTest extends WebBaseTestCase {
 	public void bizExcetion_OnlyMsg() {
 		String responseValue = new HttpClient().post(getActionUrl("bizExcetion_OnlyMsg")).getBodyString();
 
-		assertThat(responseValue, containsString("\"code\": 220,"));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"code\":220,"));
 		// 因为后台抛出了异常是带有自定义提示消息的，框架会把这个消息返回前端
-		assertThat(responseValue, containsString("\"message\": \"only msg\","));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"message\":\"only msg\","));
 	}
 	@Test
 	public void bizExcetion_ResNoArgs() {
 		String responseValue = new HttpClient().post(getActionUrl("bizExcetion_ResNoArgs")).getBodyString();
-		assertThat(responseValue, containsString("\"code\": 220,"));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"code\":220,"));
 		// 因为后台抛出了异常时，使用的是资源文件中的内容，框架会把这个消息返回前端
-		assertThat(responseValue, containsString("\"message\": \"User list!\","));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"message\":\"User list!\","));
 	}
 	@Test
 	public void bizExcetion_ResHasArgs() {
 		String responseValue = new HttpClient().post(getActionUrl("bizExcetion_ResHasArgs")).getBodyString();
-		assertThat(responseValue, containsString("\"code\": 220,"));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"code\":220,"));
 		// 因为后台抛出了异常时，使用的是资源文件中的内容，框架会把这个消息返回前端
-		assertThat(responseValue, containsString("\"message\": \"typeOfSQL of 用户(FD飞) is 123.\","));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"message\":\"typeOfSQL of 用户(FD飞) is 123.\","));
 	}
 
 	// --------- 指定错误编码的异常 ---------
@@ -166,47 +172,48 @@ public class UserManagerActionTest extends WebBaseTestCase {
 	public void bizCodeExcetion_OnlyMsg() {
 		String responseValue = new HttpClient().post(getActionUrl("bizCodeExcetion_OnlyMsg")).getBodyString();
 
-		assertThat(responseValue, containsString("\"code\": 1101,"));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"code\":1101,"));
 		// 因为后台抛出了异常是带有自定义提示消息的，框架会把这个消息返回前端
-		assertThat(responseValue, containsString("\"message\": \"only msg\","));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"message\":\"only msg\","));
 	}
 	@Test
 	public void bizCodeExcetion_ResNoArgs() {
 		String responseValue = new HttpClient().post(getActionUrl("bizCodeExcetion_ResNoArgs")).getBodyString();
-		assertThat(responseValue, containsString("\"code\": 1102,"));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"code\":1102,"));
 		// 因为后台抛出了异常时，使用的是资源文件中的内容，框架会把这个消息返回前端
-		assertThat(responseValue, containsString("\"message\": \"User list!\","));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"message\":\"User list!\","));
 	}
 	@Test
 	public void bizCodeExcetion_ResHasArgs() {
 		String responseValue = new HttpClient().post(getActionUrl("bizCodeExcetion_ResHasArgs")).getBodyString();
-		assertThat(responseValue, containsString("\"code\": 1103,"));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"code\":1103,"));
 		// 因为后台抛出了异常时，使用的是资源文件中的内容，框架会把这个消息返回前端
-		assertThat(responseValue, containsString("\"message\": \"typeOfSQL of 用户(FD飞) is 123.\","));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"message\":\"typeOfSQL of 用户(FD飞) is 123.\","));
 	}
 
 	// --------- 系统异常 ---------
 	@Test
 	public void bizSysExcetion_OnlyEx() {
 		String responseValue = post(getActionUrl("bizSysExcetion_OnlyEx"));
-		assertThat(responseValue, containsString("\"code\": 220,"));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"code\":220,"));
 		// 因为后台是对捕获的异常直接包裹后抛出，没有提供自定义消息，所以，框架会统一返回前端： "Business Exception"
-		assertThat(responseValue, containsString("\"message\": \"Business Exception\","));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"message\":\"Business Exception | "));
 	}
 	@Test
 	public void bizSysExcetion_MsgAndEx() {
 		String responseValue = post(getActionUrl("bizSysExcetion_MsgAndEx"));
-		assertThat(responseValue, containsString("\"code\": 220,"));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"code\":220,"));
 		// 因为后台抛出了异常是带有自定义提示消息的，框架会把这个消息返回前端
-		assertThat(responseValue, containsString("\"message\": \"MsgAndEx\","));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"message\":\"MsgAndEx | "));
 	}
 	@Test
 	public void bizSysExcetion_MsgAndLogAndEx() {
 		String responseValue = post(getActionUrl("bizSysExcetion_MsgAndLogAndEx"));
-		assertThat(responseValue, containsString("\"code\": 220,"));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"code\":220,"));
 		// 因为后台抛出了异常是带有自定义提示消息的，框架会把这个消息返回前端。
 		// 同时，看日志中是否打印了字符串： "logged MSG"
-		assertThat(responseValue, containsString("\"message\": \"MsgAndLogAndEx\","));
+		assertThat(responseValue.replace(": ", ":"),
+				containsString("\"message\":\"MsgAndLogAndEx | "));
 	}
 
 	// ---------------  测试有数据操作的功能  ---------------

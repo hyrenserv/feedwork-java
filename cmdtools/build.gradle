@@ -13,7 +13,7 @@ dependencies {
     compile group: 'org.freemarker', name: 'freemarker', version: '2.3.28'
     compile group: 'com.squareup.okio', name: 'okio', version: '2.2.2'
     compile "commons-codec:commons-codec:1.11"
-
+    compile group: 'org.postgresql', name: 'postgresql', version: '9.4.1212'
     testCompile group: 'com.oracle', name: 'ojdbc6', version: '11.2.0.4.0-atlassian-hosted'
 }
 

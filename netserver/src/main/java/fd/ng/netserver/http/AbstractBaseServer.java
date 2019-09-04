@@ -2,7 +2,7 @@ package fd.ng.netserver.http;
 
 import fd.ng.core.utils.DateUtil;
 import fd.ng.core.utils.StringUtil;
-import fd.ng.netserver.conf.HttpServerConf;
+import fd.ng.netserver.conf.HttpServerConfBean;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Server;
@@ -12,14 +12,17 @@ public abstract class AbstractBaseServer {
 	protected static final Logger logger = LogManager.getLogger();
 	private static Server server;
 	protected final String serverName;
-	public AbstractBaseServer() {
+	protected static HttpServerConfBean confBean;
+	public AbstractBaseServer(HttpServerConfBean confBean) {
 		this.serverName = "Web Server";
+		this.confBean = confBean;
 	}
-	public AbstractBaseServer(String serverName) {
+	public AbstractBaseServer(String serverName,HttpServerConfBean confBean) {
 		if(StringUtil.isBlank(serverName))
 			this.serverName = "Web Server";
 		else
 			this.serverName = serverName;
+		this.confBean = confBean;
 	}
 	/**
 	 * 第一步：执行初始化操作
@@ -28,11 +31,9 @@ public abstract class AbstractBaseServer {
 		String startMessage = String.format("USE SYSTEM %s %s %s", System.getProperty("os.name"), System.getProperty("os.arch"), System.getProperty("os.version"));
 		if(logger.isInfoEnabled()) logger.info(startMessage);
 		else System.out.println(startMessage);
-
 		startMessage = String.format("USE    JDK %s %s", System.getProperty("java.version"), System.getProperty("java.vm.specification.name"));
 		if(logger.isInfoEnabled()) logger.info(startMessage);
 		else System.out.println(startMessage);
-
 		logger.info("startup ...");
 		try {
 			doInit();
@@ -52,7 +53,6 @@ public abstract class AbstractBaseServer {
 			//设置在JVM退出时关闭Jetty的钩子
 			//这样就可以在整个功能测试时启动一次Jetty,然后让它在JVM退出时自动关闭
 			server.setStopAtShutdown(true);
-
 			configueConnector(server);
 			doConfigureHandler(server);
 			logger.info("Configurate Done.");
@@ -67,14 +67,15 @@ public abstract class AbstractBaseServer {
 	 */
 	public void start() {
 		try {
-			String host = ( (StringUtil.isEmpty(HttpServerConf.Host))?"localhost": HttpServerConf.Host );
-			logger.info("Starting server for {}:{}{}{}", host, HttpServerConf.HttpPort, HttpServerConf.WebContext, HttpServerConf.ActionPattern);
+			String host = ( (StringUtil.isEmpty(confBean.getHost()))?"localhost": confBean.getHost() );
+			logger.info("Starting server for {}:{}{}{}", host, confBean.getHttpPort(), confBean.getWebContext(), confBean.getActionPattern());
 			server.start();
 			String startMessage = String.format("%s started successfully at %s", this.serverName, DateUtil.getDateTime(DateUtil.DATETIME_ZHCN));
 			if(logger.isInfoEnabled()) logger.info(startMessage);
 			else System.out.println(startMessage);
 			server.join();
 		} catch ( Exception e ) {
+			e.printStackTrace();
 			logger.error(e);
 			System.exit(1);
 		}

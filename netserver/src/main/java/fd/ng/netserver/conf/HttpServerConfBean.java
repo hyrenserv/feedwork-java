@@ -1,5 +1,8 @@
 package fd.ng.netserver.conf;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @program: feedwork
  * @description: serverbane
@@ -7,6 +10,8 @@ package fd.ng.netserver.conf;
  * @create: 2019-09-03 18:07
  */
 public class HttpServerConfBean {
+
+    private String name;
     private String Host;            // 绑定的主机。如果是null或0.0.0.0，绑定到所有接口；
     private int HttpPort;
     private int IdleTimeout;
@@ -29,6 +34,23 @@ public class HttpServerConfBean {
     private int     Cookie_MaxAge; // cookie过期时间，单位是秒，默认为8小时
     private boolean Cookie_HttpOnly;
     private String  Cookie_Path; // 默认不设置
+    private final Map<String, String> propertyMap = new HashMap<>(0);
+
+    public Map<String, String> getPropertyMap() {
+        return propertyMap;
+    }
+
+    public void addProperty(String key, String val) {
+        propertyMap.put(key, val);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getHost() {
         return Host;

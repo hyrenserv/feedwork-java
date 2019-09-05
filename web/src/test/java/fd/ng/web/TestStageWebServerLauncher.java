@@ -40,7 +40,7 @@ public class TestStageWebServerLauncher extends WebServer {
 	@Override
 	protected void addFilter(ServletContextHandler contextApp) {
 		contextApp.addFilter(MyFilter.class,"/my/*", EnumSet.of(DispatcherType.REQUEST));
-		contextApp.addFilter(WrapFdwebFilter.class, HttpServerConf.confBean.ActionPattern, EnumSet.of(DispatcherType.REQUEST));
+		contextApp.addFilter(WrapFdwebFilter.class, HttpServerConf.confBean.getActionPattern(), EnumSet.of(DispatcherType.REQUEST));
 	}
 
 	@Override

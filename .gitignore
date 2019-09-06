@@ -1,4 +1,4 @@
-# IntelliJ project files
+﻿# IntelliJ project files
 .idea
 *.iml
 out
@@ -6,6 +6,9 @@ gen
 
 # Gradle
 .gradle
+gradle
+gradlew
+gradlew.bat
 build/
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -35,5 +38,6 @@ gradle-app.setting
 /testing/src/test/java/org/
 /testing/src/test/java/blabla/
 /example-web/
+settings.gradle
 TODO
-
+src/

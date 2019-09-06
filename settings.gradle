@@ -4,7 +4,6 @@ include 'database'
 include 'testing'
 include 'web'
 include 'cmdtools'
-include 'example-web'
 include 'netclient'
 include 'netserver'
 

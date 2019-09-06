@@ -79,8 +79,8 @@ subprojects {
         testCompile group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
         testCompile group: 'mysql', name: 'mysql-connector-java', version: '5.1.47'
         testCompile project(':testing')
-        compile group: 'com.univocity', name: 'univocity-parsers', version: '2.8.2'
-        compile group: 'org.postgresql', name: 'postgresql', version: '9.4.1212'
+        testCompile group: 'com.univocity', name: 'univocity-parsers', version: '2.8.2'
+        testCompile group: 'org.postgresql', name: 'postgresql', version: '42.2.6'
     }
 
     def moduleRootPackagePrefix = "$project.group.$project.name"

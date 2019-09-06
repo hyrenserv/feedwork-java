@@ -1,5 +1,8 @@
 package fd.ng.netserver.conf;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @program: feedwork
  * @description: serverbane
@@ -7,28 +10,47 @@ package fd.ng.netserver.conf;
  * @create: 2019-09-03 18:07
  */
 public class HttpServerConfBean {
-    public String Host;            // 绑定的主机。如果是null或0.0.0.0，绑定到所有接口；
-    public int HttpPort;
-    public int IdleTimeout;
-    public int HttpsPort;
-    public String WebContext;
-    public String ActionPattern;
+
+    private String name;
+    private String Host;            // 绑定的主机。如果是null或0.0.0.0，绑定到所有接口；
+    private int HttpPort;
+    private int IdleTimeout;
+    private int HttpsPort;
+    private String WebContext;
+    private String ActionPattern;
     //	// CORS 跨域配置
-	public boolean CORS_Allow;
-	public String  CORS_acao;  // Access-Control-Allow-Origin
-	public String  CORS_acam;  // Access-Control-Allow-Methods
-	public String  CORS_acac;  // Access-Control-Allow-Credentials
+    private boolean CORS_Allow;
+    private String  CORS_acao;  // Access-Control-Allow-Origin
+    private String  CORS_acam;  // Access-Control-Allow-Methods
+    private String  CORS_acac;  // Access-Control-Allow-Credentials
 
     // session
     public int Session_MaxAge_Default = 300; // 默认的session过期时间：5分钟。
     // session过期时间，单位是秒。这是指不活动的过期时间，也就是说，如果一直在页面做操作，就一直有效。如果5分钟都没有操作，则失效
-    public int Session_MaxAge;
-    public boolean Session_HttpOnly; // true：通过程序(JS脚本、Applet等)将无法读取到Cookie信息，这样能有效的防止XSS攻击。
+    private int Session_MaxAge;
+    private boolean Session_HttpOnly; // true：通过程序(JS脚本、Applet等)将无法读取到Cookie信息，这样能有效的防止XSS攻击。
 
 //	// cookie
-    public int     Cookie_MaxAge; // cookie过期时间，单位是秒，默认为8小时
-    public boolean Cookie_HttpOnly;
-    public String  Cookie_Path; // 默认不设置
+    private int     Cookie_MaxAge; // cookie过期时间，单位是秒，默认为8小时
+    private boolean Cookie_HttpOnly;
+    private String  Cookie_Path; // 默认不设置
+    private final Map<String, String> propertyMap = new HashMap<>(0);
+
+    public Map<String, String> getPropertyMap() {
+        return propertyMap;
+    }
+
+    public void addProperty(String key, String val) {
+        propertyMap.put(key, val);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getHost() {
         return Host;

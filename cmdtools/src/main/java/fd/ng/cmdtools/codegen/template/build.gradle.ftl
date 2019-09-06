@@ -40,8 +40,11 @@ subprojects {
         compile fileTree(dir: "$rootDir/libs/runtime", include: ['*.jar'])
         compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.2'
         compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.11.2'
-        compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
         compile group: 'com.zaxxer', name: 'HikariCP', version: '3.3.1'
+        compile group: 'com.alibaba', name: 'fastjson', version: '1.2.58'
+
+
+        // 根据项目情况，修改使用的jdbc包
         compile group: 'org.postgresql', name: 'postgresql', version: '42.2.6'
 
         // 对于非WEB项目，删除以下3个依赖

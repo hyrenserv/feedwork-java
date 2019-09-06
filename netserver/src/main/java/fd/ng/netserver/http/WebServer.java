@@ -60,11 +60,11 @@ public class WebServer extends AbstractDatabaseServer {
     @Override
     protected void configueConnector(Server server) {
         ServerConnector connector = new ServerConnector(server);
-        if (confBean.getHost() != null) {
+        if (confBean.getHost() != null)
             connector.setHost(confBean.getHost());
-        }
         connector.setPort(confBean.getHttpPort());
-        connector.setIdleTimeout(confBean.getIdleTimeout());
+        if(confBean.getIdleTimeout()!=null)
+            connector.setIdleTimeout(confBean.getIdleTimeout());
         /*
          * 据说：解决Windows下重复启动Jetty不报告端口冲突的问题。
          * 在Windows下有个Windows + Sun的connector实现的问题：reuseAddress=true时重复启动同一个端口的Jetty不会报错。

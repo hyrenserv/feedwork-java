@@ -23,7 +23,7 @@ public class LoginActionSessionTest extends WebBaseTestCase {
 				, new String[][]{
 				{"username", "admin"}, {"password", "admin"}
 		});
-		assertThat(responseValue, containsString("\"code\": 200,"));
+		assertThat(responseValue.replace(": ", ":"), containsString("\"code\":200,"));
 	}
 
 	@Test

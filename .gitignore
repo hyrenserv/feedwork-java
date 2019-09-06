@@ -5,6 +5,7 @@ out
 gen
 
 # Gradle
+settings.gradle
 .gradle
 gradle
 gradlew
@@ -38,6 +39,5 @@ gradle-app.setting
 /testing/src/test/java/org/
 /testing/src/test/java/blabla/
 /example-web/
-settings.gradle
 TODO
-src/
+/src/

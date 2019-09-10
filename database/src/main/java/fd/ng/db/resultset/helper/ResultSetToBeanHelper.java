@@ -120,7 +120,16 @@ public class ResultSetToBeanHelper {
 					value = primitiveDefaults.get(propType);
 				}
 			}
-
+			/*
+			FIXME
+			propType : 是 Bean 中当前字段的 Java 类型
+			value    : 是表中相应字段的数据
+			如果彼此不一致，会导致异常。
+			比如：DB表中字段是 Decimal(10)，Bean中相应字段是 Long，就会导致下面的反射赋值时出现异常
+			解决办法：
+			在循环外面通过rs.getMetaData()提前获取每个字段的数据类型，
+			对于Decimal(10)的字段，记录位置，并且在本循环中强制类型转换为Long
+			 */
 			this.callSetter(bean, prop, value);
 		}
 		return bean;

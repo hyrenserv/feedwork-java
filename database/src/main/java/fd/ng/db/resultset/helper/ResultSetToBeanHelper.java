@@ -75,7 +75,7 @@ public class ResultSetToBeanHelper {
 				throw new TooManyRecordsException(classOfBean.getName());
 			else
 				return bean;
-		} catch (InvocationTargetException | IllegalAccessException | InstantiationException e) {
+		} catch (IllegalAccessException | InstantiationException e) {
 			throw new SQLException(e);
 		}
 	}
@@ -95,14 +95,14 @@ public class ResultSetToBeanHelper {
 				T bean = this.populateBean(rs, classOfBean, props, columnToProperty);
 				results.add(bean);
 			} while (rs.next());
-		} catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
+		} catch (IllegalAccessException | InstantiationException e) {
 			throw new SQLException(e);
 		}
 		return results;
 	}
 
 	private <T> T populateBean(ResultSet rs, Class<? extends T> classOfBean, PropertyDescriptor[] props, int[] columnToProperty)
-			throws SQLException, InvocationTargetException, IllegalAccessException, InstantiationException {
+			throws IllegalAccessException, InstantiationException, SQLException {
 		T bean = classOfBean.newInstance();
 		for (int i = 1; i < columnToProperty.length; i++) {
 			if (columnToProperty[i] == PROPERTY_NOT_FOUND) {
@@ -111,15 +111,16 @@ public class ResultSetToBeanHelper {
 			// 得到当前列对应的bean属性的类型
 			PropertyDescriptor prop = props[columnToProperty[i]];
 			Class<?> propType = prop.getPropertyType();
-
 			Object value = null;
-			if (propType != null) {
-				value = this.processColumn(rs, i, propType);
+			try {
 
-				if (value == null && propType.isPrimitive()) {
-					value = primitiveDefaults.get(propType);
+				if (propType != null) {
+					value = this.processColumn(rs, i, propType);
+
+					if (value == null && propType.isPrimitive()) {
+						value = primitiveDefaults.get(propType);
+					}
 				}
-			}
 			/*
 			FIXME
 			propType : 是 Bean 中当前字段的 Java 类型
@@ -129,8 +130,12 @@ public class ResultSetToBeanHelper {
 			解决办法：
 			在循环外面通过rs.getMetaData()提前获取每个字段的数据类型，
 			对于Decimal(10)的字段，记录位置，并且在本循环中强制类型转换为Long
+			或者，给实体的这些字段加上注解
 			 */
-			this.callSetter(bean, prop, value);
+				this.callSetter(bean, prop, value);
+			} catch (Exception e) {
+				throw new SQLException("prop=" + prop + ", propType=" + propType + ", value=" + value, e);
+			}
 		}
 		return bean;
 	}

@@ -125,6 +125,7 @@ public final class EntityOperator {
 		qmark.deleteCharAt(qmark.length()-1);
 		sql.append(qmark).append(")");
 
+		db.beginTrans();
 		return db.execute(sql.toString(), valueList);
 	}
 
@@ -196,6 +197,7 @@ public final class EntityOperator {
 //		else
 //			throw new RawlayerRuntimeException("entity : [" + tableName + "] all properties is null!");
 
+		db.beginTrans();
 		return db.execute(sql.toString(), valueList);
 	}
 
@@ -237,6 +239,7 @@ public final class EntityOperator {
 			//sql=new StringBuilder("delete from ").append(entityName);
 			throw new RawlayerRuntimeException("No delete conditions are set for [" + tableName + "], please using clearAllData()!");
 
+		db.beginTrans();
 		return db.execute(sql.toString(), valueList);
 	}
 
@@ -257,6 +260,7 @@ public final class EntityOperator {
 		if(logger.isDebugEnabled()) {
 			logger.debug("entity clean all data");
 		}
+		db.beginTrans();
 		return db.ExecDDL("truncate table " + tableName);
 	}
 

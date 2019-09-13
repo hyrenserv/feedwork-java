@@ -7,8 +7,25 @@ public class UuidUtil {
 
 	public UuidUtil() { throw new AssertionError("No UuidUtil instances for you!"); }
 
+//	public static String uuid() {
+//		return UUID.randomUUID().toString().replace("-", StringUtil.EMPTY); //.toLowerCase();
+//	}
+
+	/**
+	 * 得到没有中间横线的UUID串，性能比使用replace快5倍
+	 * @return
+	 */
 	public static String uuid() {
-		return UUID.randomUUID().toString().replace("-", StringUtil.EMPTY); //.toLowerCase();
+		return uuid(UUID.randomUUID());
+	}
+	public static String uuid(UUID uuid) {
+		long mostSigBits  = uuid.getMostSignificantBits();
+		long leastSigBits = uuid.getLeastSignificantBits();
+		return (digits(mostSigBits >> 32, 8) +
+				digits(mostSigBits >> 16, 4) +
+				digits(mostSigBits, 4) +
+				digits(leastSigBits >> 48, 4) +
+				digits(leastSigBits, 12));
 	}
 
 	/**
@@ -28,4 +45,9 @@ public class UuidUtil {
 		return System.nanoTime() - STARTED_NANO_TIME;
 	}
 	public static long timeMillis() { return System.currentTimeMillis(); }
+
+	private static String digits(long val, int digits) {
+		long hi = 1L << (digits * 4);
+		return Long.toHexString(hi | (val & (hi - 1))).substring(1);
+	}
 }

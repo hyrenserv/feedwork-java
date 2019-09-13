@@ -538,24 +538,6 @@ public class StringUtilTest extends FdBaseTestCase
 //		}
 	}
 
-	/**
-	 * 判断字符串是否为数字
-	 */
-	@Test
-	public void isNumeric2(){
-
-		assertThat(StringUtil.isNumeric2("sdf"), is(false));
-		assertThat(StringUtil.isNumeric2("10000"), is(true));
-	}
-
-	@Test
-	public void fileSizeConversion(){
-
-		assertThat(StringUtil.fileSizeConversion(1024L), is("1 KB"));
-		assertThat(StringUtil.fileSizeConversion(1048576L), is("1 MB"));
-		assertThat(StringUtil.fileSizeConversion(1073741824L), is("1 GB"));
-
-	}
 	// 测试对小串的多次替换的效率
 	// 结论：commons-lang 2.6的性能竟然是最好的，奇怪了
 	@Ignore

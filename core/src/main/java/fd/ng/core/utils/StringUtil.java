@@ -19,11 +19,11 @@ public abstract class StringUtil {
 	public static final char LF = '\n';
 	public static final char CR = '\r';
 	public static final char NUL = '\0';
-    private static final char AT_SIGN = '@';
+	public static final char AT_SIGN = '@';
 
     // 驼峰风格和下划线风格转换用
-	private static final Pattern PATTERN_HUMP2UNDERLINE = Pattern.compile("[A-Z]");
-	private static final Pattern PATTERN_UNDERLINE2HUMP = Pattern.compile("_[a-z]");
+    public static final Pattern PATTERN_HUMP2UNDERLINE = Pattern.compile("[A-Z]");
+	public static final Pattern PATTERN_UNDERLINE2HUMP = Pattern.compile("_[a-z]");
 
 	public StringUtil() { throw new AssertionError("No StringUtil instances for you!"); }
 
@@ -563,50 +563,5 @@ public abstract class StringUtil {
 			logger.warn("Exception during lenientFormat for " + objectToString, e);
 			return "<" + objectToString + " threw " + e.getClass().getName() + ">";
 		}
-	}
-	/**
-	 * <p>方法描述: 判断一个字符串是不是数字</p >
-	 * <p></p >
-	 * <p>@author: Mr.Lee </p >
-	 * <p>创建时间: 2019-09-06</p >
-	 * <p>return:  是否为数字</p >
-	 *
-	 * @param str 需要判断的字符串
-	 */
-	public static boolean isNumeric2(String str) {
-
-		char[] charArr = str.toCharArray();
-		int index = str.indexOf("-"); // 负号的索引
-		for(int i = 0; i < charArr.length; i++) {
-			if( i == index ) {
-				continue;
-			}
-			else {
-				if( charArr[i] >= '0' && charArr[i] <= '9' ) {
-					continue;
-				}
-				else {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * <p>方法描述: 将文件的字节转换为对应的大小</p >
-	 * <p>@author: Mr.Lee </p >
-	 * <p>创建时间: 2019-09-04</p >
-	 * <p>return:  返回格式转换后的格式</p >
-	 *
-	 * @param size 文件字节大小</p >
-	 */
-	public static String fileSizeConversion(Long size) {
-
-		if( size <= 0 )
-			return "0 B";
-		final String[] units = new String[] { "B", "KB", "MB", "GB", "TB" };
-		int digitGroups = (int)(Math.log10(size) / Math.log10(1024));
-		return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
 	}
 }

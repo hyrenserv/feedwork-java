@@ -10,6 +10,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.nio.file.*;
+import java.text.DecimalFormat;
 
 /*
 Path用于来表示文件路径和文件（和File对象类似），Path就是取代File的.
@@ -57,7 +58,10 @@ public class FileUtil {
 	public static final String TEMP_DIR_NAME; // 系统临时目录名
 	public static final File TEMP_DIR; // 系统临时目录对象
 
-	public static final long ONE_KB = 1024;
+	public static final String[] FILESIZE_UNITS = new String[] { "B", "KB", "MB", "GB", "TB" };
+	public static final String FILESIZE_ZERO = "0 B";
+	public static final DecimalFormat FILESIZE_FORMAT = new DecimalFormat("#,##0.#");
+	public static final long ONE_KB = 1024L;
 
 	public static final BigInteger ONE_KB_BI = BigInteger.valueOf(ONE_KB);
 	public static final long ONE_MB = ONE_KB * ONE_KB;
@@ -78,6 +82,19 @@ public class FileUtil {
 		TEMP_DIR = new File(TEMP_DIR_NAME);
 		if(!TEMP_DIR.exists()) throw new FrameworkRuntimeException("temp dir [] wrong, it's not exist.");
 		else if(!TEMP_DIR.isDirectory()) throw new FrameworkRuntimeException("temp dir [] wrong, it's not Dir.");
+	}
+
+	/**
+	 * 将文件的字节转换为对应的大小
+	 *
+	 * @param size long 文件字节大小
+	 * @return
+	 */
+	public static String fileSizeConversion(long size) {
+		if( size <= 0 )
+			return FILESIZE_ZERO;
+		int digitGroups = (int)(Math.log10(size) / Math.log10(ONE_KB));
+		return FILESIZE_FORMAT.format(size / Math.pow(ONE_KB, digitGroups)) + " " + FILESIZE_UNITS[digitGroups];
 	}
 
 	// 给传入的 pathName 追加文件分隔符

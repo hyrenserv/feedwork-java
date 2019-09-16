@@ -224,6 +224,25 @@ public class Dbo extends SqlOperator {
 	}
 
 	/**
+	 * 查询单列多条数据。（如果SQL中写了多个字段，只取第一列）
+	 * @param sql String 带有'?'占位符的sql语句
+	 * @param params Object 对应sql中的'?'占位符的各个参数值
+	 * @return List<T> 不会出现null，如果没有查询到数据，返回的是空 List
+	 */
+	public static <T> List<T> queryOneColumnList(String sql, Object... params) {
+		return SqlOperator.queryOneColumnList(db(), sql, params);
+	}
+	/**
+	 * 分页查询单列多条数据。（如果SQL中写了多个字段，只取第一列）
+	 * @param sql String 带有'?'占位符的sql语句
+	 * @param params Object 对应sql中的'?'占位符的各个参数值
+	 * @return List<T> 不会出现null，如果没有查询到数据，返回的是空 List
+	 */
+	public static <T> List<T> queryPagedOneColumnList(Page page, String sql, Object... params) {
+		return SqlOperator.queryPagedOneColumnList(db(), page, sql, params);
+	}
+
+	/**
 	 * 查询多条数据。
 	 * @param sql String 带有'?'占位符的sql语句
 	 * @param params Object 对应sql中的'?'占位符的各个参数值

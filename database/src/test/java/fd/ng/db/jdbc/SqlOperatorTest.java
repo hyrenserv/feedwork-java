@@ -4,10 +4,13 @@ import fd.ng.db.DbBaseTestCase;
 import fd.ng.db.conf.DbinfosConf;
 import fd.ng.db.resultset.Result;
 import fd.ng.db.resultset.TooManyRecordsException;
+import fd.ng.db.resultset.processor.ArrayListProcessor;
+import fd.ng.db.resultset.processor.OneColumnListProcessor;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.junit.runners.MethodSorters;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -24,7 +27,7 @@ public class SqlOperatorTest extends DbBaseTestCase {
 	public static void start() {
 		try(DatabaseWrapper db = new DatabaseWrapper()) {
 			if (!db.isExistTable(testTableName))
-				db.ExecDDL("create table " + testTableName + "( name varchar(20), age int)");
+				db.ExecDDL("create table " + testTableName + "( name varchar(20), age int, money DECIMAL(10, 2) )");
 			SqlOperator.beginTransaction(db);
 			assertThat("启动事务失败", db.isBeginTrans(), is(true));
 		}
@@ -35,11 +38,12 @@ public class SqlOperatorTest extends DbBaseTestCase {
 		try(DatabaseWrapper db = new DatabaseWrapper()) {
 			List<Object[]> params = new ArrayList<>();
 			for (int i = 0; i < Init_Rows; i++) {
-				Object[] rowParams = new Object[]{"newUser" + i, i};
+				BigDecimal money = new BigDecimal("10"+i+"."+i);
+				Object[] rowParams = new Object[]{"newUser" + i, i, money};
 				params.add(rowParams);
 			}
 			int[] nums = SqlOperator.executeBatch(db,
-					"insert into " + testTableName + "(name, age) values(?, ?)",
+					"insert into " + testTableName + "(name, age, money) values(?, ?, ?)",
 					params
 			);
 			assertThat("initData 失败", nums.length, is(Init_Rows));
@@ -296,6 +300,46 @@ public class SqlOperatorTest extends DbBaseTestCase {
 			assertThat(result.get(1)[1], is(8));
 		}
 	}
+	@Test
+	public void t43_queryToOneColumnList() {
+		try(DatabaseWrapper db = new DatabaseWrapper()) {
+//			List<BigDecimal> result = db.query("select age,name from " + testTableName + " where age>? and age<? order by age desc",
+//					new OneColumnListProcessor<>(), 0, 10);
+			// 测试字符串列
+			List<String> result = SqlOperator.queryOneColumnList(db,
+					"select name from " + testTableName + " where age>? and age<? order by age desc",
+					0, 10
+			);
+			assertThat(result.size(), is(9));
+			assertThat(result.get(0), is("newUser9"));
+			assertThat(result.get(result.size()-1), is("newUser1"));
+			System.out.println("--------------------> result 1 :\n" + result);
+
+			// 测试数字列
+			List<Integer> result1 = SqlOperator.queryOneColumnList(db,
+					"select age, name from " + testTableName + " where age>? and age<? order by age desc",
+					0, 10
+			);
+			assertThat(result1.size(), is(9));
+			assertThat(result1.get(0), is(9));
+			assertThat(result1.get(result1.size()-1), is(1));
+			System.out.println("--------------------> result 2 :\n" + result1);
+
+			// 测试分页
+			Page page = new DefaultPageImpl(2, 3);
+			List<BigDecimal> result3 = SqlOperator.queryPagedOneColumnList(db, page,
+					"select money from " + testTableName + " where age>? and age<? order by age",
+					0, 10
+			);
+			assertThat(page.getTotalSize(), is(9));
+			assertThat(page.getPageCount(), is(3));
+			assertThat(result3.size(), is(3));      // 每页3行
+			assertThat(result3.get(0), is(new BigDecimal("104.40")));
+			assertThat(result3.get(2), is(new BigDecimal("106.60")));
+			System.out.println("--------------------> result 3 :\n" + result3);
+		}
+	}
+
 	@Test
 	public void t43_queryToBeanList() {
 		try(DatabaseWrapper db = new DatabaseWrapper()) {

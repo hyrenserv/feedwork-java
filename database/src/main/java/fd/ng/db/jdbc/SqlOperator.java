@@ -103,6 +103,21 @@ public class SqlOperator {
 		return result;
 	}
 
+	public static <T> List<T> queryOneColumnList(DatabaseWrapper db,
+	                                             String sql, Object... params) {
+		return db.query(sql, new OneColumnListProcessor<>(), params);
+	}
+	public static <T> List<T> queryPagedOneColumnList(DatabaseWrapper db, Page page,
+	                                         String sql, Object... params) {
+		if(page.getBeginOfPage()<0) throw new RevitalizedCheckedException("begin不能为负数！");
+		if(page.getBeginOfPage()>=page.getEndOfPage()) throw new RevitalizedCheckedException("begin必须小于end！");
+		int begin = page.getBeginOfPage();
+		int end = page.getEndOfPage();
+		List<T> result = db.queryPaged(sql, begin, end, page.isCountTotalSize(), new OneColumnListProcessor<>(), params);
+		page.setTotalSize(db.getCounts());
+		return result;
+	}
+
 	/**
 	 * 查询多条数据。
 	 * @param db DatabaseWrapper

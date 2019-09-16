@@ -23,6 +23,7 @@ public class ResponseUtil {
 	}
 
 	public static void writeJSON(HttpServletResponse response, ActionResult data) {
+		if(response.isCommitted()) return;
 		response.setContentType("application/json; charset=utf-8");
 		response.setCharacterEncoding("UTF-8"); // 防止中文乱码
 		response.setStatus(HttpServletResponse.SC_OK);

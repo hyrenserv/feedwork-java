@@ -63,15 +63,15 @@ public class FileUtil {
 	public static final DecimalFormat FILESIZE_FORMAT = new DecimalFormat("#,##0.#");
 	public static final long ONE_KB = 1024L;
 
-	public static final BigInteger ONE_KB_BI = BigInteger.valueOf(ONE_KB);
+	public static final Long ONE_KB_LONG = ONE_KB;
 	public static final long ONE_MB = ONE_KB * ONE_KB;
-	public static final BigInteger ONE_MB_BI = ONE_KB_BI.multiply(ONE_KB_BI);
+	public static final Long ONE_MB_LONG = ONE_KB_LONG * ONE_KB_LONG;
 	public static final long ONE_GB = ONE_KB * ONE_MB;
-	public static final BigInteger ONE_GB_BI = ONE_KB_BI.multiply(ONE_MB_BI);
+	public static final Long ONE_GB_LONG = ONE_KB_LONG * ONE_MB_LONG;
 	public static final long ONE_TB = ONE_KB * ONE_GB;
-	public static final BigInteger ONE_TB_BI = ONE_KB_BI.multiply(ONE_GB_BI);
+	public static final Long ONE_TB_LONG = ONE_KB_LONG * ONE_GB_LONG;
 	public static final long ONE_PB = ONE_KB * ONE_TB;
-	public static final BigInteger ONE_PB_BI = ONE_KB_BI.multiply(ONE_TB_BI);
+	public static final Long ONE_PB_LONG = ONE_KB_LONG * ONE_TB_LONG;
 
 	private static final long FILE_COPY_BUFFER_SIZE = ONE_MB * 30;
 

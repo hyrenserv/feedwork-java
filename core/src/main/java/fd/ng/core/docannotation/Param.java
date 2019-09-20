@@ -1,5 +1,7 @@
 package fd.ng.core.docannotation;
 
+import fd.ng.core.utils.StringUtil;
+
 import java.lang.annotation.*;
 
 @Inherited
@@ -41,4 +43,10 @@ public @interface Param {
 	 * @return
 	 */
 	boolean isRequestBean() default false;
+
+	/**
+	 * 例子数据，如10.78.90.22这样有特殊意义的数据
+	 * @return
+	 */
+	String example() default StringUtil.EMPTY;
 }

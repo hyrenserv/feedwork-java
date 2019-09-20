@@ -1,24 +1,32 @@
 package fd.ng.web.action;
 
+import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.annotation.JSONField;
 import fd.ng.core.utils.JsonUtil;
 import fd.ng.core.utils.StringUtil;
 import fd.ng.db.resultset.Result;
 
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class ActionResult {
 	protected Integer code;
 	protected String message;
 	protected Object data;
-	public ActionResult() {}
+
+	public ActionResult() {
+	}
 
 	public ActionResult(Integer code, String message) {
 		this(code, message, null);
 	}
 
-	public ActionResult(Integer code, String message,Object data) {
+	public ActionResult(Integer code, String message, Object data) {
 		this.code = code;
-		this.message = message==null? StringUtil.EMPTY :message;
+		this.message = message == null ? StringUtil.EMPTY : message;
 		_set_data(data);
 	}
 
@@ -51,14 +59,13 @@ public class ActionResult {
 	}
 
 	private void _set_data(Object data) {
-		if(data==null)
+		if (data == null)
 			this.data = StringUtil.EMPTY;
-		else if(data instanceof Result) {
-			this.data = ((Result)data).toList();
-		}
-		else if(data instanceof Optional) {
+		else if (data instanceof Result) {
+			this.data = ((Result) data).toList();
+		} else if (data instanceof Optional) {
 			Optional opData = (Optional) data;
-			if(opData.isPresent())
+			if (opData.isPresent())
 				this.data = opData.get();
 			else
 				this.data = StringUtil.EMPTY;
@@ -66,7 +73,8 @@ public class ActionResult {
 			this.data = data;
 		}
 	}
-//	/**
+
+	//	/**
 //	 * 返回对象。只支持主类型（int/String等），或者是 POJO 类
 //	 * 如果包含复杂数据，可使用 getDataObjectByNodeName
 //	 * @param clazz
@@ -80,6 +88,22 @@ public class ActionResult {
 //	public <T> T getDataObjectByNodeName(String name, Class<T> clazz) {
 //		return JsonUtil.toObjectByNodeName(this.data.toString(), name, clazz);
 //	}
+	@JSONField(serialize = false,deserialize = false)
+	public Result getDataForResult() {
+		if (data == null) return new Result();
+		Type type = new TypeReference<List<Map<String, Object>>>() {
+		}.getType();
+		List<Map<String, Object>> arData = JsonUtil.toObject((String) data, type);
+		return new Result(arData);
+	}
+
+	@JSONField(serialize = false,deserialize = false)
+	public <T> List<T> getDataForEntityList(Class<T> clz) {
+		if (data == null) return Collections.emptyList();
+		Type type = new TypeReference<List<T>>() {
+		}.getType();
+		return JsonUtil.toObject((String) data, type);
+	}
 
 	@Override
 	public String toString() {

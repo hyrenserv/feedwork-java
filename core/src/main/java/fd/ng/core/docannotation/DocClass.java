@@ -7,11 +7,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DocClass {
 	/**
-	 * 是否为rest api
-	 * @return
-	 */
-	boolean isRest() default false;
-	/**
 	 * 类描述
 	 * @return
 	 */

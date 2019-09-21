@@ -12,10 +12,10 @@ public class CodegenMain implements CmdMain {
 	private ArgsParser cmd;
 	public CodegenMain(String[] args) {
 		cmd = new ArgsParser()
-				.addOption("codedir", "目录", "本自动生成的项目代码根目录", true)
-				.addOption("basepkg", "包名", "项目的基本包名", true)
-				.addOption("ftldir",  "目录", "模版文件所在的根目录", false)
-				.addOption("-E",                     "可选参数：是否从DB中生成实体", false)
+				.defOptionPair("codedir", true, "本自动生成的项目代码根目录")
+				.defOptionPair("basepkg", true, "项目的基本包名")
+				.defOptionPair("ftldir",  false, "模版文件所在的根目录")
+				.defOptionSwitch("-E",    false, "可选参数：是否从DB中生成实体")
 				.parse(args);
 	}
 
@@ -23,7 +23,7 @@ public class CodegenMain implements CmdMain {
 	public void start() {
 		// 创建项目的骨架，生成初始的各种公用java类
 		ProjectStructCreator creator = new ProjectStructCreator(
-				cmd.option("codedir").value, cmd.option("basepkg").value, cmd.option("ftldir").value);
+				cmd.opt("codedir").value, cmd.opt("basepkg").value, cmd.opt("ftldir").value);
 		creator.clearAndCreateProjectDirs();
 		creator.genGeneralJavaCodeFiles();
 		creator.genGeneralJavaTestCodeFiles();

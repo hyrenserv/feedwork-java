@@ -293,31 +293,34 @@ web.xml中增加以下配置：
 
 ### - 命令行解析
 
-使用 ArgsParser 工具类做命令行参数解析。  
-接受的格式为：  
-- 名值对：name=value
-- 仅参数名
+使用 ArgsParser 工具类做命令行参数解析。接受两种命令行参数：  
+- 名值对参数：name=value
+- 无值参数
 如果值中有空格、制表符等字符，需使用双引号。  
-如果有前后双引号，那么里面双引号需要加转义字符： \   
+如果有前后双引号，那么里面双引号需要加转义字符 \   
 
-例如，有如下命令行参数：
+例如，有如下命令行参数：  
 ```shell script
-java -jar yours.jar type=r rows=5000 -fw file=/tmp/io-jdk.csv
+java -jar yours.jar type=r -fw file=/tmp/io-jdk.csv
 ```
-对应的解析程序为：
+对应的解析程序为：  
 ```java
 public class YoursMainClass {
     public static void main(String[] args) {
+        // 使用 defOptionPair   定义名值对的命令行参数
+        // 使用 defOptionSwitch 定义无值的命令行参数
         ArgsParser cmd = new ArgsParser()
-                        .addOption("file",   "文件名",   "读写测试的文件名", true)
-                        .addOption("type",   "r|w|rw",   "读写测试类型", true)
-                        .addOption("rows",   "数字",     "写文件的总行数", false)
-                        .addOption("-fw",    "每次写操作时，是否自动执行flush", false)
-                        .parse(args);
+				.defOptionPair("file", true, "文件名")
+				.defOptionPair("type", true, "[r|w|rw] 读写类型")
+				.defOptionSwitch("-fw", false, "是否自动执行flush")
+                .parse(args);
         // cmd.usage();  // 显示完整的参数使用说明。（其说明文字来源于上面的各个 addOption）
         // 以上构造了一个命令行对象，之后，可通过如下方式获取各参数的实际输入值
-        String filename = cmd.option("file").value;
-        if(cmd.option("type").is("w")) {
+        String filename = cmd.opt("file").value;
+        if(cmd.opt("type").is("w")) {
+            // do something
+        }
+        if(cmd.opt("-fw").exist()) {
             // do something
         }
     }

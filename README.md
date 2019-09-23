@@ -309,10 +309,11 @@ public class YoursMainClass {
     public static void main(String[] args) {
         // 使用 defOptionPair   定义名值对的命令行参数
         // 使用 defOptionSwitch 定义无值的命令行参数
+        // 3个参数为： 参数名、是否必须提供、参数说明
         ArgsParser cmd = new ArgsParser()
-				.defOptionPair("file", true, "文件名")
-				.defOptionPair("type", true, "[r|w|rw] 读写类型")
-				.defOptionSwitch("-fw", false, "是否自动执行flush")
+                .defOptionPair("file", true, "文件名")
+                .defOptionPair("type", true, "[r|w|rw] 读写类型")
+                .defOptionSwitch("-fw", false, "是否自动执行flush")
                 .parse(args);
         // cmd.usage();  // 显示完整的参数使用说明。（其说明文字来源于上面的各个 addOption）
         // 以上构造了一个命令行对象，之后，可通过如下方式获取各参数的实际输入值

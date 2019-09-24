@@ -100,7 +100,7 @@ public class ActionResult {
 	@JSONField(serialize = false,deserialize = false)
 	public <T> List<T> getDataForEntityList(Class<T> clz) {
 		if (data == null) return Collections.emptyList();
-		Type type = new TypeReference<List<T>>() {
+		Type type = new TypeReference<List<T>>(clz) {
 		}.getType();
 		return JsonUtil.toObject(data.toString(), type);
 	}

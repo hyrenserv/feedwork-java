@@ -93,7 +93,7 @@ public class ActionResult {
 		if (data == null) return new Result();
 		Type type = new TypeReference<List<Map<String, Object>>>() {
 		}.getType();
-		List<Map<String, Object>> arData = JsonUtil.toObject((String) data, type);
+		List<Map<String, Object>> arData = JsonUtil.toObject(data.toString(), type);
 		return new Result(arData);
 	}
 
@@ -102,7 +102,15 @@ public class ActionResult {
 		if (data == null) return Collections.emptyList();
 		Type type = new TypeReference<List<T>>() {
 		}.getType();
-		return JsonUtil.toObject((String) data, type);
+		return JsonUtil.toObject(data.toString(), type);
+	}
+
+	@JSONField(serialize = false,deserialize = false)
+	public <K,V> Map<K,V> getDataForMap() {
+		if (data == null) return Collections.emptyMap();
+		Type type = new TypeReference<Map<K,V>>() {
+		}.getType();
+		return JsonUtil.toObject(data.toString(), type);
 	}
 
 	@Override

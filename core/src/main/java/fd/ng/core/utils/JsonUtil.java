@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Type;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
@@ -58,16 +59,31 @@ public class JsonUtil {
      * 把json串转换为java对象。对小数据使用该函数。
      * 如果要出来大文件，需使用 toJsonOnBigData
      *
-     * @param json
+     * @param json String 原始json串
      * @param type
      * @param <T>
      * @return
      */
     public static <T> T toObject(String json, Class<T> type) {
-        T obj = JSON.parseObject(json, type);
-        return obj;
+        return toObjectSafety(json,type).orElse(null);
     }
 
+    /**
+     * 把json串转换为java对象。对小数据使用该函数。
+     * 如果要出来大文件，需使用 toJsonOnBigData
+     * 在action中强烈建议使用该方法
+     * @param json  String 原始json串
+     * @param type
+     * @param <T>
+     * @return Optional 对象
+     */
+    public static <T> Optional<T> toObjectSafety(String json, Class<T> type) {
+        try {
+            return Optional.of(JSON.parseObject(json,type));
+        }catch (Exception e){
+            return Optional.empty();
+        }
+    }
     /**
      * 对json串里面的一个节点，获取其对象
      *
@@ -78,11 +94,23 @@ public class JsonUtil {
      * @return 获取的对象
      */
     public static <T> T toObjectByNodeName(String json, String nodeName, Class<T> type) {
-        if (json == null || nodeName == null) return null;
-        String nodeValue = getNodeValue(json, nodeName);
-        return toObject(nodeValue, type);
+        return toObjectByNodeNameSafety(json,nodeName,type).orElse(null);
     }
 
+    /**
+     * 对json串里面的一个节点，获取其对象
+     * 在action中强烈建议使用该方法
+     * @param json     String 原始json串
+     * @param nodeName String 要获取的节点的名字
+     * @param type     Class 只支持主类型和JavaBean
+     * @param <T>      泛型，只支持主类型和JavaBean
+     * @return Optional 获取的对象
+     */
+    public static <T> Optional<T> toObjectByNodeNameSafety(String json, String nodeName, Class<T> type) {
+        if (json == null || nodeName == null) return null;
+        String nodeValue = getNodeValue(json, nodeName);
+        return toObjectSafety(nodeValue, type);
+    }
     /**
      * 对于复杂类型转换时时候。例如 List<Person> 的复合类型对象。
      * 第2个参数需要在提前创建：
@@ -96,8 +124,7 @@ public class JsonUtil {
 
 
     public static <T> T toObject(String json, Type type) {
-        T obj = JSON.parseObject(json, type);
-        return obj;
+        return JSON.parseObject(json, type);
     }
 
     /**

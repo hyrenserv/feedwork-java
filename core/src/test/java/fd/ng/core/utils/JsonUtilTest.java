@@ -180,9 +180,19 @@ public class JsonUtilTest extends FdBaseTestCase {
         ThreeClass three = JsonUtil.toObject(threeClassString, ThreeClass.class);
         assertThat(three.getName(), is("three"));
         assertThat(three.getAge(), is(-10));
+
+        Optional<ThreeClass> threeClass = JsonUtil.toObjectSafety(threeClassString, ThreeClass.class);
+        assertThat(threeClass.get().getName(), is("three"));
+        assertThat(threeClass.get().getAge(), is(-10));
+
+
         ThreeClass three1 = JsonUtil.toObjectByNodeName(json, "threeClass", ThreeClass.class);
         assertThat(three1.getName(), is("three"));
         assertThat(three1.getAge(), is(-10));
+
+        Optional<ThreeClass> threeClass1 = JsonUtil.toObjectByNodeNameSafety(json, "threeClass", ThreeClass.class);
+        assertThat(threeClass1.get().getName(), is("three"));
+        assertThat(threeClass1.get().getAge(), is(-10));
 
         Type type = new TypeReference<Map<String, Object>>() {
         }.getType();

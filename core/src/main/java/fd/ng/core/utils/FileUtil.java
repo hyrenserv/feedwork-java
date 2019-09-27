@@ -5,7 +5,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.math.BigInteger;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
@@ -84,6 +83,46 @@ public class FileUtil {
 		else if(!TEMP_DIR.isDirectory()) throw new FrameworkRuntimeException("temp dir [] wrong, it's not Dir.");
 	}
 
+	/**
+	 * 从一组名字中创建一个 File。
+	 * 使用本方法可以避免因为不同操作系统的分隔符导致的问题。
+	 * 例如： FileUtil.getFile("src", "main", "java"));
+	 *
+	 * @param names 名字
+	 * @return the file
+	 */
+	public static File getFile(final String... names) {
+		Validator.notNull(names);
+
+		File file = null;
+		for (final String name : names) {
+			if (file == null) {
+				file = new File(name);
+			} else {
+				file = new File(file, name);
+			}
+		}
+		return file;
+	}
+	/**
+	 * 基于一个父目录，从一组名字中创建一个 File。
+	 * 使用本方法可以避免因为不同操作系统的分隔符导致的问题。
+	 * 例如： FileUtil.getFile("src", "main", "java"));
+	 *
+	 * @param parentDirectory 父目录
+	 * @param names 名字
+	 * @return the file
+	 */
+	public static File getFile(final File parentDirectory, final String... names) {
+		Validator.notNull(parentDirectory);
+		Validator.notNull(names);
+
+		File file = parentDirectory;
+		for (final String name : names) {
+			file = new File(file, name);
+		}
+		return file;
+	}
 	/**
 	 * 将文件的字节转换为对应的大小
 	 *

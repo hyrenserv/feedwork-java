@@ -86,17 +86,17 @@ public class IOUtil {
 
     //-----------------------------------------------------------------------
 
-    /**
-     * Closes a URLConnection.
-     *
-     * @param conn the connection to close.
-     * @since 2.4
-     */
-    public static void close(final URLConnection conn) {
-        if (conn instanceof HttpURLConnection) {
-            ((HttpURLConnection) conn).disconnect();
-        }
-    }
+//    /**
+//     * Closes a URLConnection.
+//     *
+//     * @param conn the connection to close.
+//     * @since 2.4
+//     */
+//    public static void close(final URLConnection conn) {
+//        if (conn instanceof HttpURLConnection) {
+//            ((HttpURLConnection) conn).disconnect();
+//        }
+//    }
 
     /**
      * Returns the given reader if it is already a {@link BufferedReader}, otherwise creates a BufferedReader from
@@ -236,10 +236,53 @@ public class IOUtil {
         }
     }
 
+    /**
+     * Gets the contents of an <code>InputStream</code> as a String
+     * using the specified character encoding.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     * </p>
+     *
+     * @param input the <code>InputStream</code> to read from
+     * @param encoding the encoding to use, null means platform default
+     * @return the requested String
+     * @throws NullPointerException if the input is null
+     * @throws IOException          if an I/O error occurs
+     */
+    public static String toString(final InputStream input, final Charset encoding) throws IOException {
+        try (final StringBuilderWriter sw = new StringBuilderWriter()) {
+            copy(input, sw, encoding);
+            return sw.toString();
+        }
+    }
     //-----------------------------------------------------------------------
 
     // copy from InputStream
     //-----------------------------------------------------------------------
+
+    /**
+     * Copies bytes from an <code>InputStream</code> to chars on a
+     * <code>Writer</code> using the specified character encoding.
+     * <p>
+     * This method buffers the input internally, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     * <p>
+     * This method uses {@link InputStreamReader}.
+     *
+     * @param input the <code>InputStream</code> to read from
+     * @param output the <code>Writer</code> to write to
+     * @param inputEncoding the encoding to use for the input stream, null means platform default
+     * @throws NullPointerException if the input or output is null
+     * @throws IOException          if an I/O error occurs
+     * @since 2.3
+     */
+    public static void copy(final InputStream input, final Writer output, final Charset inputEncoding)
+            throws IOException {
+        final InputStreamReader in = new InputStreamReader(input,
+                inputEncoding == null ? Charset.defaultCharset() : inputEncoding);
+        copy(in, output);
+    }
 
     /**
      * Copies bytes from an <code>InputStream</code> to an

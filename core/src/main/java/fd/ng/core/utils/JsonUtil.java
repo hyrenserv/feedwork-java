@@ -64,6 +64,7 @@ public class JsonUtil {
      * @param <T>
      * @return
      */
+    @Deprecated
     public static <T> T toObject(String json, Class<T> type) {
         return toObjectSafety(json,type).orElse(null);
     }
@@ -93,6 +94,7 @@ public class JsonUtil {
      * @param <T>      泛型，只支持主类型和JavaBean
      * @return 获取的对象
      */
+    @Deprecated
     public static <T> T toObjectByNodeName(String json, String nodeName, Class<T> type) {
         return toObjectByNodeNameSafety(json,nodeName,type).orElse(null);
     }

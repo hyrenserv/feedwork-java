@@ -2,6 +2,9 @@ package fd.ng.db.jdbc;
 
 import fd.ng.core.exception.internal.FrameworkRuntimeException;
 import fd.ng.core.exception.internal.RevitalizedCheckedException;
+import fd.ng.core.utils.ArrayUtil;
+import fd.ng.core.utils.StringUtil;
+import fd.ng.core.utils.Validator;
 import fd.ng.db.resultset.Result;
 import fd.ng.db.resultset.processor.*;
 import org.apache.logging.log4j.LogManager;
@@ -228,5 +231,75 @@ public class SqlOperator {
 	public static int[] executeBatch(DatabaseWrapper db, String sql, List<Object[]> params) {
 		db.beginTrans();
 		return db.execBatch(sql, params);
+	}
+
+	public static class Assembler {
+		public static final String COND_AND = "and";
+		public static final String COND_OR = "or";
+
+		private StringBuilder sqlBuf;
+		private List<Object>  params;
+
+		public static Assembler newInstance() { return new Assembler(); }
+		private Assembler() {
+			sqlBuf = new StringBuilder(64);
+			params = new ArrayList<>();
+		}
+
+		public Assembler addSql(final String sqlPart) {
+			sqlBuf.append(sqlPart).append(' ');
+			return this;
+		}
+		public Assembler addParam(final Object param) {
+			params.add(param);
+			return this;
+		}
+
+		public Assembler addLikeParam(final String column, final String param) {
+			return addLikeParam(column, param, COND_AND);
+		}
+		public Assembler addLikeParam(final String column, final String param, final String cond) {
+			Validator.notNull(column);
+			Validator.notNull(cond);
+			if(StringUtil.isEmpty(param)) return this;
+
+			sqlBuf.append(' ').append(cond).append(' ').append(column).append(" like ? ");
+			params.add(param);
+
+			return this;
+		}
+
+		public Assembler addORParam(final String column, final Object[] param) {
+			return addORParam(column, param, COND_AND);
+		}
+		public Assembler addORParam(final String column, final Object[] param, final String cond) {
+			Validator.notNull(column);
+			Validator.notNull(cond);
+			if(ArrayUtil.isEmpty(param)) return this;
+
+			if(param.length==1) {
+				sqlBuf.append(' ').append(cond).append(' ').append(column).append("=?");
+				params.add(param[0]);
+				return this;
+			}
+
+			sqlBuf.append(' ').append(cond).append(' ').append(column).append(" in (");
+			for (int i = 0; i <param.length ; i++) {
+				Object value = param[i];
+				sqlBuf.append("?,");
+				params.add(value);
+			}
+			sqlBuf.deleteCharAt(sqlBuf.length()-1).append(')');
+
+			return this;
+		}
+
+		public String sql() { return sqlBuf.toString(); }
+		public List<Object> params() { return params; }
+		public void cleanParams() { params.clear(); }
+		public void clean() {
+			this.sqlBuf.delete(0, this.sqlBuf.length());
+			cleanParams();
+		}
 	}
 }

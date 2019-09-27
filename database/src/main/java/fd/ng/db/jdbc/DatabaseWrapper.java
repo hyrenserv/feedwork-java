@@ -9,6 +9,7 @@ import fd.ng.db.conf.DbinfosConf;
 import fd.ng.db.conf.Dbtype;
 import fd.ng.db.jdbc.nature.*;
 import fd.ng.db.resultset.ResultSetProcessor;
+import fd.ng.db.util.SqlUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -187,7 +188,7 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 			if(this.dbinfo.isShow_sql_time()) start = System.currentTimeMillis();
 			int nums = curPstmt.executeUpdate();
 			if(this.showsql&&logger.isInfoEnabled())
-				logger.info("{} ExecU sql : [ {} ]", this.traceId, getGoodshowSql(-1, -1, sql, params));
+				logger.info("{} ExecU sql : [ {} ]", this.traceId, SqlUtil.getGoodshowSql(-1, -1, sql, params));
 			if(this.dbinfo.isShow_sql_time()) {
 				long end = System.currentTimeMillis();
 				long et = end - start;
@@ -358,9 +359,9 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 		ResultSet rs = curPstmt.executeQuery();
 		if(this.showsql&&logger.isInfoEnabled()) {
 			if(isPaged)
-				logger.info("{} Query sql : [ {} ]", this.traceId, getGoodshowSql(begin, end, sql, params));
+				logger.info("{} Query sql : [ {} ]", this.traceId, SqlUtil.getGoodshowSql(begin, end, sql, params));
 			else
-				logger.info("{} Query sql : [ {} ]", this.traceId, getGoodshowSql(-1, -1, sql, params));
+				logger.info("{} Query sql : [ {} ]", this.traceId, SqlUtil.getGoodshowSql(-1, -1, sql, params));
 		}
 		if(this.dbinfo.isShow_sql_time()) {
 			long endTime = System.currentTimeMillis();

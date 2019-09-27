@@ -435,6 +435,33 @@ public class SqlOperatorTest extends DbBaseTestCase {
 		}
 	}
 
+	@Test
+	public void queryByAssembler() {
+		try(DatabaseWrapper db = new DatabaseWrapper()) {
+			// 造1条测试数据，为了能有 money>10 的条件
+			for (int i = 0; i < 10; i++) {
+				int nums = SqlOperator.execute(db,
+						"insert into " + testTableName + "(name, age, money) values(?, ?, ?)",
+						"queryByAssembler"+i, i, 5+i
+				);
+				assertThat(nums, is(1));
+			}
+			SqlOperator.commitTransaction(db);
+
+			SqlOperator.Assembler asmSql = SqlOperator.Assembler.newInstance()
+					.addSql("select * from").addSql(testTableName).addSql("where")
+					.addSql("money>?").addParam(10)
+					.addLikeParam("name", "queryByAssembler%")
+					.addORParam("age", new Object[]{1, 2, 9})
+					;
+			List<JdbcTestUser> result = SqlOperator.queryList(db, JdbcTestUser.class,
+					asmSql.sql(), asmSql.params()
+			);
+			assertThat(result.size(), is(1));
+			assertThat(result.get(0).getName(), is("queryByAssembler9"));
+		}
+	}
+
 	/**
 	 * 验证数据查询的中文的获取是否正确
 	 */

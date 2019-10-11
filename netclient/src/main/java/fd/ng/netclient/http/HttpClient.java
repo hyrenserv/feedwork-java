@@ -182,7 +182,6 @@ public class HttpClient {
 
 	/**
 	 * 这个方法与addData互斥。如果使用了本方法，则通过 addData 添加的数据被忽略
-	 * @param name
 	 * @param json
 	 * @return
 	 */
@@ -479,6 +478,10 @@ public class HttpClient {
 
 	public static String getSessionid() {
 		return _JSESSIONID_STRING.get();
+	}
+
+	public static List<Cookie> getCookie(String host){
+		return cookieStore.get(host);
 	}
 
 	public static class ResponseValue {

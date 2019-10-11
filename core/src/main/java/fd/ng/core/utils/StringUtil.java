@@ -21,36 +21,42 @@ public abstract class StringUtil {
 	public static final char NUL = '\0';
 	public static final char AT_SIGN = '@';
 
-    // 驼峰风格和下划线风格转换用
-    public static final Pattern PATTERN_HUMP2UNDERLINE = Pattern.compile("[A-Z]");
+	// 驼峰风格和下划线风格转换用
+	public static final Pattern PATTERN_HUMP2UNDERLINE = Pattern.compile("[A-Z]");
 	public static final Pattern PATTERN_UNDERLINE2HUMP = Pattern.compile("_[a-z]");
 
-	public StringUtil() { throw new AssertionError("No StringUtil instances for you!"); }
+	public StringUtil() {
+		throw new AssertionError("No StringUtil instances for you!");
+	}
 
-	public static boolean isEmpty(final CharSequence cs){
+	public static boolean isEmpty(final CharSequence cs) {
 		return cs == null || cs.length() == 0;
 	}
-	public static boolean isNotEmpty(final CharSequence cs){
+
+	public static boolean isNotEmpty(final CharSequence cs) {
 		return !isEmpty(cs);
 	}
+
 	/**
 	 * 判断是否空白字符串。空白字符包括：空格、tab键、换行符
+	 *
 	 * @param cs
 	 * @return
 	 */
-	public static boolean isBlank(final CharSequence cs){
+	public static boolean isBlank(final CharSequence cs) {
 		int strLen;
 		if (cs == null || (strLen = cs.length()) == 0) {
 			return true;
 		}
 		for (int i = 0; i < strLen; i++) {
 			if (!Character.isWhitespace(cs.charAt(i))) {
-			return false;
+				return false;
 			}
 		}
 		return true;
 	}
-	public static boolean isNotBlank(final CharSequence cs){
+
+	public static boolean isNotBlank(final CharSequence cs) {
 		return !isBlank(cs);
 	}
 
@@ -100,60 +106,62 @@ public abstract class StringUtil {
 
 	/**
 	 * 得到子串出现的次数
+	 *
 	 * @param sourceStr 源串
 	 * @param searchStr 要查找的字符串
 	 * @return 出现的次数
 	 */
-	public static int substringCount(final String sourceStr, final String searchStr){
-		if(StringUtil.isEmpty(sourceStr)||StringUtil.isEmpty(searchStr)) return 0;
+	public static int substringCount(final String sourceStr, final String searchStr) {
+		if (StringUtil.isEmpty(sourceStr) || StringUtil.isEmpty(searchStr)) return 0;
 		int loc = sourceStr.indexOf(searchStr);
-		if(loc<0) return 0;
+		if (loc < 0) return 0;
 		int count = 1; // 记录出现的次数。 前面indexOf已经找到了，所以至少有1次。
 		int serLen = searchStr.length();
-		String subStr = sourceStr.substring(loc+serLen);
-		while (true){
+		String subStr = sourceStr.substring(loc + serLen);
+		while (true) {
 			loc = subStr.indexOf(searchStr);
-			if(loc<0)
+			if (loc < 0)
 				break;
-			subStr = subStr.substring(loc+serLen);
+			subStr = subStr.substring(loc + serLen);
 			count++;
 		}
 		return count;
 	}
+
 	/**
 	 * 因为JDK中replaceFirst是做正则匹配的，影响性能。
+	 *
 	 * @param sourceStr 源串
 	 * @param searchStr 要查找的字符串
 	 * @return
 	 */
-	public static String replaceFirst(final String sourceStr, final String searchStr){
+	public static String replaceFirst(final String sourceStr, final String searchStr) {
 		return replaceFirst(sourceStr, searchStr, EMPTY);
 	}
+
 	/**
 	 * 从前向后，替换第一次出现的位置。
 	 * 因为JDK中replaceFirst是做正则匹配的，影响性能。
+	 *
 	 * @param sourceStr
 	 * @param searchStr
 	 * @param replaceStr
 	 * @return
 	 */
-	public static String replaceFirst(final String sourceStr, final String searchStr, final String replaceStr)
-	{
-		if(StringUtil.isEmpty(sourceStr)||StringUtil.isEmpty(searchStr)) return sourceStr;
+	public static String replaceFirst(final String sourceStr, final String searchStr, final String replaceStr) {
+		if (StringUtil.isEmpty(sourceStr) || StringUtil.isEmpty(searchStr)) return sourceStr;
 		int firstLoc = sourceStr.indexOf(searchStr);
-		if(firstLoc==0){
-			if(StringUtil.isEmpty(replaceStr))
+		if (firstLoc == 0) {
+			if (StringUtil.isEmpty(replaceStr))
 				return sourceStr.substring(searchStr.length());
 			else
 				return replaceStr + sourceStr.substring(searchStr.length());
-		}
-		else{
+		} else {
 			int srcLen = sourceStr.length();
 			int serLen = searchStr.length();
-			if(StringUtil.isEmpty(replaceStr)){
+			if (StringUtil.isEmpty(replaceStr)) {
 				return sourceStr.substring(0, firstLoc) + sourceStr.substring(firstLoc + serLen, srcLen);
-			}
-			else {
+			} else {
 				int repLen = replaceStr.length();
 				StringBuilder sb = new StringBuilder(srcLen - serLen + repLen);
 				sb.append(sourceStr.substring(0, firstLoc))
@@ -164,26 +172,25 @@ public abstract class StringUtil {
 		}
 	}
 
-	public static String replaceLast(final String sourceStr, final String searchStr){
+	public static String replaceLast(final String sourceStr, final String searchStr) {
 		return replaceLast(sourceStr, searchStr, EMPTY);
 	}
-	public static String replaceLast(final String sourceStr, final String searchStr, final String replaceStr)
-	{
-		if(StringUtil.isEmpty(sourceStr)||StringUtil.isEmpty(searchStr)) return sourceStr;
-		if(sourceStr.endsWith(searchStr)){
+
+	public static String replaceLast(final String sourceStr, final String searchStr, final String replaceStr) {
+		if (StringUtil.isEmpty(sourceStr) || StringUtil.isEmpty(searchStr)) return sourceStr;
+		if (sourceStr.endsWith(searchStr)) {
 			int loc = sourceStr.lastIndexOf(searchStr);
-			if(StringUtil.isEmpty(replaceStr))
+			if (StringUtil.isEmpty(replaceStr))
 				return sourceStr.substring(0, loc);
 			else
-				return sourceStr.substring(0, loc)+replaceStr;
-		}
-		else{
+				return sourceStr.substring(0, loc) + replaceStr;
+		} else {
 			// 如果要支持正则表达式搜索，可以用下面这句
 			// return sourceStr.replaceFirst("(?s)(.*)" + searchString, "$1" + replaceString);
 			int lastLoc = sourceStr.lastIndexOf(searchStr);
-			if(lastLoc<0) return sourceStr;
-			else if(lastLoc==0){ // 在开头
-				if(StringUtil.isEmpty(replaceStr))
+			if (lastLoc < 0) return sourceStr;
+			else if (lastLoc == 0) { // 在开头
+				if (StringUtil.isEmpty(replaceStr))
 					return sourceStr.substring(searchStr.length());
 				else
 					return replaceStr + sourceStr.substring(searchStr.length());
@@ -199,7 +206,7 @@ public abstract class StringUtil {
 			int srcLen = sourceStr.length();
 			int serLen = searchStr.length();
 			int repLen = replaceStr.length();
-			StringBuilder sb = new StringBuilder(srcLen-serLen+repLen);
+			StringBuilder sb = new StringBuilder(srcLen - serLen + repLen);
 			sb.append(sourceStr.substring(0, lastLoc))
 					.append(replaceStr)
 					.append(sourceStr.substring(lastLoc + serLen, srcLen));
@@ -218,8 +225,8 @@ public abstract class StringUtil {
 	 * StringUtil.identityToString(buf, Boolean.TRUE)  = buf.append("java.lang.Boolean@7fa")
 	 * </pre>
 	 *
-	 * @param buffer  the buffer to append to
-	 * @param object  the object to create a toString for
+	 * @param buffer the buffer to append to
+	 * @param object the object to create a toString for
 	 */
 	public static void identityToString(final StringBuffer buffer, final Object object) {
 		Validator.notNull(object, "Cannot get the toString of a null object");
@@ -248,8 +255,8 @@ public abstract class StringUtil {
 	 * StringUtil.containsNone("abz", 'xyz')  = false
 	 * </pre>
 	 *
-	 * @param cs  the CharSequence to check, may be null
-	 * @param searchChars  an array of invalid chars, may be null
+	 * @param cs          the CharSequence to check, may be null
+	 * @param searchChars an array of invalid chars, may be null
 	 * @return true if it contains none of the invalid chars, or is null
 	 */
 	public static boolean containsNone(final CharSequence cs, final char... searchChars) {
@@ -300,13 +307,13 @@ public abstract class StringUtil {
 	 * StringUtil.containsAny("aba", ['z'])           = false
 	 * </pre>
 	 *
-	 * @param cs  the CharSequence to check, may be null
-	 * @param searchChars  the chars to search for, may be null
+	 * @param cs          the CharSequence to check, may be null
+	 * @param searchChars the chars to search for, may be null
 	 * @return the {@code true} if any of the chars are found,
 	 * {@code false} if no match or null input
 	 */
 	public static boolean containsAny(final CharSequence cs, final char... searchChars) {
-		if (isEmpty(cs) || searchChars==null || searchChars.length==0) {
+		if (isEmpty(cs) || searchChars == null || searchChars.length == 0) {
 			return false;
 		}
 		final int csLength = cs.length();
@@ -351,7 +358,7 @@ public abstract class StringUtil {
 	 * StringUtils.trimCrLf("\r\n")        = ""
 	 * </pre>
 	 *
-	 * @param str  源串
+	 * @param str 源串
 	 * @return String
 	 */
 	public static String trimCrLf(final String str) {
@@ -415,7 +422,7 @@ public abstract class StringUtil {
 		}
 		final int repLen = searchStr.length();
 		int increase = repStr.length() - repLen;
-		increase = (increase > 0 ? increase*16 : 0);
+		increase = (increase > 0 ? increase * 16 : 0);
 		final StringBuilder buf = new StringBuilder(srcString.length() + increase);
 		while (end != INDEX_NOT_FOUND) {
 			buf.append(srcString, start, end).append(repStr);
@@ -429,12 +436,13 @@ public abstract class StringUtil {
 	/**
 	 * 分割字符串，返回List<String>。如果想得到String[]，可对结果List做转换：list.toArray(new String[list.size()]);
 	 * 因为JDK的split有各种怪异问题，比如结尾多个连续分隔符号会被忽略掉（1:2:3::::，这种串用:分隔时，只能返回1,2,3)
-	 *
+	 * <p>
 	 * 可以使用 StringFaster 试试是不是能更快。
-	 *
+	 * <p>
 	 * 另外，GUAVA的split超快，是因为他返回的是Iterator，实际并没有一个个分隔了串，只是在开始取数时才开始分隔
 	 * 所以，如果只是取分隔的前几个子串，他最快，但是如果每个子串都取一次，就和其他方式一样的耗时了
-	 * @param str 被分割的原始字符串
+	 *
+	 * @param str       被分割的原始字符串
 	 * @param separator 分割符
 	 * @return List<String> 不会null，两个入参任何一个为空，都放回一个空List。
 	 */
@@ -514,11 +522,11 @@ public abstract class StringUtil {
 //
 //	}
 
-	public static String lenientFormat(String template, Object ... args) {
+	public static String lenientFormat(String template, Object... args) {
 		template = String.valueOf(template); // null -> "null"
 
 		if (args == null) {
-			args = new Object[] {"(Object[])null"};
+			args = new Object[]{"(Object[])null"};
 		} else {
 			for (int i = 0; i < args.length; i++) {
 				args[i] = lenientToString(args[i]);
@@ -553,6 +561,7 @@ public abstract class StringUtil {
 
 		return builder.toString();
 	}
+
 	private static String lenientToString(Object o) {
 		try {
 			return String.valueOf(o);
@@ -563,5 +572,34 @@ public abstract class StringUtil {
 			logger.warn("Exception during lenientFormat for " + objectToString, e);
 			return "<" + objectToString + " threw " + e.getClass().getName() + ">";
 		}
+	}
+
+	/**
+	 * 字符串转换unicode
+	 */
+	public static String string2Unicode(String string) {
+		StringBuffer unicode = new StringBuffer();
+		for (int i = 0; i < string.length(); i++) {
+			// 取出每一个字符
+			char c = string.charAt(i);
+			// 转换为unicode
+			unicode.append("\\u" + Integer.toHexString(c));
+		}
+		return unicode.toString();
+	}
+
+	/**
+	 * unicode 转字符串
+	 */
+	public static String unicode2String(String unicode) {
+		StringBuffer string = new StringBuffer();
+		String[] hex = unicode.split("\\\\u");
+		for (int i = 1; i < hex.length; i++) {
+			// 转换出每一个代码点
+			int data = Integer.parseInt(hex[i], 16);
+			// 追加成string
+			string.append((char) data);
+		}
+		return string.toString();
 	}
 }

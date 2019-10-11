@@ -603,4 +603,10 @@ public class StringUtilTest extends FdBaseTestCase
 			System.out.printf("[AP3] replace %-9d time : %4d, newstr (%s)\n", count, time, newStr.substring(0, outLen));
 		}
 	}
+	@Test
+	public void string2Unicode(){
+		assertThat(StringUtil.string2Unicode("ab"),is("\\u61\\u62"));
+
+		assertThat(StringUtil.unicode2String("\\u61\\u62"),is("ab"));
+	}
 }

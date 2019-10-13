@@ -1,8 +1,5 @@
 package fd.ng.core.annotation;
 
-
-import fd.ng.core.annotation.Param;
-
 import java.lang.annotation.*;
 
 @Inherited

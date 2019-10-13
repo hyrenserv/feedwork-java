@@ -1,19 +1,18 @@
 package fd.ng.web.util.beans;
 
-import fd.ng.web.annotation.RequestBean;
-import fd.ng.web.annotation.RequestParam;
+import fd.ng.core.annotation.Param;
 
 import java.math.BigDecimal;
 
 public class PersonForRequest {
-	@RequestParam(name = "username")
+	@Param(alias = "username", desc = "d", range = "r")
 	String name;
 	int age;
 	int[] ages;
 	String sex;
 	String[] favors;
 	BigDecimal money;
-	@RequestBean
+	@Param(isBean = true, desc = "d", range = "r")
 	PersonOtherForRequest otherPerson;
 
 	public PersonOtherForRequest getOtherPerson() {

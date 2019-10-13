@@ -2,6 +2,7 @@ package fd.ng.web;
 
 import fd.ng.netserver.conf.HttpServerConf;
 import fd.ng.netserver.http.WebServer;
+import fd.ng.web.helper.ActionInstanceHelper;
 import fd.ng.web.hmfmswebapp.customs.filter.MyFilter;
 import fd.ng.web.hmfmswebapp.customs.filter.WrapFdwebFilter;
 import fd.ng.web.hmfmswebapp.customs.listener.InitListener;
@@ -20,10 +21,11 @@ public class TestStageWebServerLauncher extends WebServer {
 
 	public static void main(String[] args) {
 		TestStageWebServerLauncher webServer = new TestStageWebServerLauncher();
-//		webServer.init();
-//		webServer.config();
-//		webServer.start();
-		webServer.running();
+		webServer.init();
+		webServer.config();
+		ActionInstanceHelper.getAllActionMap();
+		webServer.start();
+//		webServer.running();
 	}
 
 	@Override

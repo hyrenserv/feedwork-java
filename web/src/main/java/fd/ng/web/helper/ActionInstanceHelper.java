@@ -1,5 +1,8 @@
 package fd.ng.web.helper;
 
+import fd.ng.core.annotation.Param;
+import fd.ng.core.annotation.ParamValue;
+import fd.ng.core.annotation.Params;
 import fd.ng.core.conf.AppinfoConf;
 import fd.ng.core.exception.internal.FrameworkRuntimeException;
 import fd.ng.core.utils.ArrayUtil;
@@ -17,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,9 +35,13 @@ public final class ActionInstanceHelper
 	public static final String HEAD_URI = "/"+ AppinfoConf.AppBasePackage.replaceAll("\\.", "/");
 	// 存储所有的 Action 类的实例化对象。 key：Action包名或注解 UriExt 的值，value：Action实例对象
 	private static Map<String, Object> allActionMap = new HashMap<>();
+	// key: uri全路径（即包名+方法名）， value: map（方法名， 方法对象）
 	private static Map<String, Map<String, Method>> allActionMethodMap = new HashMap<>();
+	// key: Action的每个方法， value: map（参数名， 参数注解的值）
+	private static Map<Method, Map<String, ParamValue>> allActionMethodParamMap = new HashMap<>();
 	static{
 		try{
+			logger.debug("Instance Action ... ...");
 			boolean hasError = false;
 			// 不能通过基类来判断。因为多层继承的情况下，中间的类很可能不需要实例化，甚至中间的类可能是抽象类
 			// 所以，必须通过注解来判断哪些类需要被实例化
@@ -44,7 +52,7 @@ public final class ActionInstanceHelper
 			Map<Class<?>, String> wrongActions = new HashMap<>(); // 记录每个有问题的Action及错误提示信息。
 			for(final Class<?> actionClass : actionClassList) {
 				final String className = actionClass.getName();
-				//logger.debug("current class : {}", className);
+				logger.trace("============= Current Class : {} =============", className);
 				if(Modifier.isAbstract(actionClass.getModifiers())){
 					// 过滤掉抽象类（Action的父类都应该定义为抽象类，否则会被实例化
 					logger.trace("SKIP Abstract class : {}", className);
@@ -84,6 +92,8 @@ public final class ActionInstanceHelper
 				// 2.2）得到该 Action 类的所有 public 方法并存下来
 				// 存储当前 Action 类所有方法的容器
 				Map<String, Method> actionMethodMap = new HashMap<>();
+//				// 存储当前 Action 类所有方法的参数信息的容器
+//				Map<String, Map<String, ParamValue>> actionMethodParamMap = new HashMap<>();
 				// 得到当前 Action 类的所有方法
 				Method[] actionMethods = actionClass.getDeclaredMethods();
 				if(ArrayUtil.isEmpty(actionMethods)) {
@@ -112,10 +122,36 @@ public final class ActionInstanceHelper
 						} else if(actionMethod.isVarArgs()) {
 							wrongMethods.add(String.format("方法：%s 不允许使用可变参数", curMethodName));
 						} else if(actionMethodMap.containsKey(curMethodName)) { // 存在相同名字的方法是不合法的，存下来
-							wrongMethods.add(String.format("方法名：%s 已经存在！如果是同名方法，请使用UrlMethod注解；如果是UrlMethod注解重名，请更换其他名字", curMethodName));
+							wrongMethods.add(String.format("方法名：%s 已经存在！如果是同名方法，请使用UrlName注解。如果是UrlName注解重名，请更换其他名字", curMethodName));
 							actionMethodMap.remove(curMethodName);
 						} else {
 							actionMethodMap.put(curMethodName, actionMethod);
+
+							// 获取该方法的参数注解信息
+							if(actionMethod.getParameters().length<1) continue; // 该方法无参数，不需要处理注解
+
+							Param[] params;
+							Params paramsAnno = actionMethod.getAnnotation(Params.class);
+							if(paramsAnno==null) {// 该方法没有多个注解
+								Param paramAnno = actionMethod.getAnnotation(Param.class);
+								if(paramAnno==null) //该方法一个注解都没有
+									throw new Error(String.format("方法：%s 没有设置【Param】注解？",
+											actionMethod.getName()));
+								params = new Param[]{paramAnno};
+							} else {
+								params = paramsAnno.value();
+							}
+							Map<String, ParamValue> paramValueMap = new HashMap<>(params.length);
+							for(Param param : params) {
+								ParamValue paramValue = new ParamValue(param.name(), param.alias(), param.nullable(),
+										param.valueIfNull(), param.isBean(), param.ignore());
+								paramValueMap.put(param.name(), paramValue);
+							}
+							// 检查各个参数与注解是否一一匹配
+							checkParamAnno(actionClass, actionMethod, paramValueMap);
+							//TODO 检查返回值的注解是否匹配
+//							actionMethodParamMap.put(curMethodName, paramValueMap);
+							allActionMethodParamMap.put(actionMethod, paramValueMap);
 						}
 					}
 				}
@@ -131,24 +167,26 @@ public final class ActionInstanceHelper
 					if(existActionInstance!=null){
 						hasError = true;
 						if("Package".equals(actionLookupKeyType)) { // Action注解，使用包名作为 KEY
-							logger.error("同一个包中只能有一个Action，多个Action请使用@Action注解 UriExt 属性。" +
+							logger.error("同一个包中只能有一个Action，多个Action请使用@Action注解 UrlName 属性。" +
 									"package [{}] actions : {}, {}",
 									packageName, actionClass.getSimpleName(), existActionInstance.getClass().getSimpleName());
 						}
-						else { // 使用的Action注解的 UriExt 属性
+						else { // 使用的Action注解的 UrlName 属性
 							logger.error(
-									"Action(" + className + ")'s  @Action(UriExt=\""+actionLookupKey+"\")  has been used by ["+existActionInstance.getClass().getName()+"]");
+									"Action(" + className + ")'s  @Action(UrlName=\""+actionLookupKey+"\")  has been used by ["+existActionInstance.getClass().getName()+"]");
 						}
 					} else {
 						Object actionInstance = actionClass.newInstance();
 						allActionMap.put(actionLookupKey, actionInstance);
 						allActionMethodMap.put(actionLookupKey, Collections.unmodifiableMap(actionMethodMap));
+//						allActionMethodParamMap.put(actionLookupKey, Collections.unmodifiableMap(actionMethodParamMap));
 					}
 				}
 			}
 			stopWatch.stopShow();
 			allActionMap = Collections.unmodifiableMap(allActionMap);
 			allActionMethodMap = Collections.unmodifiableMap(allActionMethodMap);
+			allActionMethodParamMap = Collections.unmodifiableMap(allActionMethodParamMap);
 
 			/** 【错误排查】 */
 			// 对Action实例化清单循环一遍，如果该类没有任何public方法，那么强制提示声明为抽象类。
@@ -234,6 +272,10 @@ public final class ActionInstanceHelper
 		else return map.get(methodName);
 	}
 
+	public static Map<String, ParamValue> getActionMethodParamMap(Method method){
+		return allActionMethodParamMap.get(method);
+	}
+
 	/**
 	 * 获取 Method 对象。包含父类的 protected 方法，不包含 private 方法
 	 * @param actionClass
@@ -269,6 +311,20 @@ public final class ActionInstanceHelper
 		return result;
 	}
 
+	// 检查方法的每个注解中的name是否与参数匹配
+	private static void checkParamAnno(Class<?> actionClass, Method actionMethod, Map<String, ParamValue> paramMap) {
+		Parameter[] parameters = actionMethod.getParameters();
+		String errMsg = "";
+		for(Parameter parameter : parameters) {
+			String paramName = parameter.getName();
+			if(!paramMap.containsKey(paramName)) {
+				errMsg = errMsg + String.format("  Param [%-10s] no matched Param Annotation.%n", paramName);
+			}
+		}
+		if(errMsg.length()>0)
+			throw new Error(String.format("Action [%s] 's Method [%s] Param Error :%n%s",
+					actionClass.getSimpleName(), actionMethod.getName(), errMsg));
+	}
 	private static void putActionErrorMsg(Map<Class<?>, String> wrongActions, Class<?> actionClass, String errMsg) {
 		if(wrongActions.containsKey(actionClass)) {
 			String wrongActionInfo = wrongActions.get(actionClass);

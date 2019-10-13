@@ -1,8 +1,7 @@
 package fd.ng.web.hmfmswebapp.anno;
 
+import fd.ng.core.annotation.Param;
 import fd.ng.core.utils.StringUtil;
-import fd.ng.web.annotation.RequestBean;
-import fd.ng.web.annotation.RequestParam;
 import fd.ng.web.hmfmswebapp.WebappBaseAction;
 import fd.ng.web.hmfmswebapp.a0101.Person;
 
@@ -23,9 +22,15 @@ public class ParamAction extends WebappBaseAction {
 	 * 		requestParameter.put( "age", new String[]{"777"} );
 	 * 		requestParameter.put( "money", new String[]{"10001.01"} );
 	 */
+	@Param(name = "name",desc = "test", range = "..")
+	@Param(name = "request",desc = "test", range = "..")
+	@Param(name = "age",desc = "test", range = "..")
+	@Param(name = "person",isBean = true,desc = "test", range = "..")
+	@Param(name = "money",desc = "test", range = "..")
+	@Param(name = "igore_info",desc = "test", range = "..", ignore = true)
 	public String testParamsPerson(String name, HttpServletRequest request, int age,
-	                               @RequestBean Person person, BigDecimal money,
-	                               @RequestParam(ignore = true) String igore_info) {
+	                               Person person, BigDecimal money,
+	                               String igore_info) {
 		String result = "name=" + name + ", age=" + age + ", arg_money=" + money
 				+ ", req_money=" + ((request==null)?"no_request":request.getParameter("money"))
 				+ ", person=" + person;
@@ -33,8 +38,12 @@ public class ParamAction extends WebappBaseAction {
 		return result;
 	}
 
+	@Param(name = "oneFeedBean",isBean = true, desc = "test", range = "..")
+	@Param(name = "oneTableEntity",isBean = true,desc = "test", range = "..")
+	@Param(name = "age1", alias = "age", desc = "test", range = "..")
+	@Param(name = "name",desc = "test", range = "..")
 	public String testParamsBeanAndEntity(OneFeedBean oneFeedBean, OneTableEntity oneTableEntity,
-	                                      String name, @RequestParam(name = "age") String age1) {
+	                                      String name, String age1) {
 		String result = "name=" + name + ", age=" + age1
 				+ ", oneFeedBean=" + oneFeedBean
 				+ ", oneTableEntity=" + oneTableEntity;
@@ -50,10 +59,18 @@ public class ParamAction extends WebappBaseAction {
 	 * 		requestParameter.put( "age", new String[]{"777"} );
 	 * 		requestParameter.put( "ages", new String[]{"10", "11", "12"} );
 	 */
+	@Param(name = "name",desc = "test", range = "..")
+	@Param(name = "request",desc = "test", range = "..")
+	@Param(name = "age1",alias = "age",desc = "test", range = "..")
+	@Param(name = "agenull",nullable = true, desc = "test", range = "..")
+	@Param(name = "agedefault",valueIfNull = {"1"}, desc = "test", range = "..")
+	@Param(name = "ages",desc = "test", range = "..")
+	@Param(name = "agesnull",nullable = true, desc = "test", range = "..")
+	@Param(name = "agesdefault",valueIfNull = {"2", "3"}, desc = "test", range = "..")
 	public String testParamsString(
 			String name, HttpServletRequest request,
-			@RequestParam(name = "age") String age1, @RequestParam(nullable = true) String agenull, @RequestParam(valueIfNull = {"1"}) String agedefault,
-			String[] ages, @RequestParam(nullable = true) String[] agesnull, @RequestParam(valueIfNull = {"2","3"}) String[] agesdefault ) {
+			String age1, String agenull, String agedefault,
+			String[] ages, String[] agesnull, String[] agesdefault ) {
 		String result = ("name=" + name + ", sex=" + request.getParameter("sex")
 				+ ", sexes=" + Arrays.toString(request.getParameterValues("sexes"))
 				+ ", age=" + age1 + ", agenull=" + agenull + ", agedefault=" + agedefault
@@ -71,10 +88,18 @@ public class ParamAction extends WebappBaseAction {
 	 * 		requestParameter.put( "age", new String[]{"777"} );
 	 * 		requestParameter.put( "ages", new String[]{"10", "11", "12"} );
 	 */
+	@Param(name = "name",desc = "test", range = "..")
+	@Param(name = "request",desc = "test", range = "..")
+	@Param(name = "age",desc = "test", range = "..")
+	@Param(name = "agenull",valueIfNull = {"0"}, desc = "test", range = "..")
+	@Param(name = "agedefault",valueIfNull = {"1"}, desc = "test", range = "..")
+	@Param(name = "ages",desc = "test", range = "..")
+	@Param(name = "agesnull",valueIfNull = {"0", "0"}, desc = "test", range = "..")
+	@Param(name = "agesdefault",valueIfNull = {"2", "3"}, desc = "test", range = "..")
 	public String testParamsInt(
 			String name, HttpServletRequest request,
-			int age, @RequestParam(valueIfNull = {"0"}) int agenull, @RequestParam(valueIfNull = {"1"}) int agedefault,
-			int[] ages, @RequestParam(valueIfNull = {"0", "0"}) int[] agesnull, @RequestParam(valueIfNull = {"2","3"}) int[] agesdefault ) {
+			int age, int agenull, int agedefault,
+			int[] ages, int[] agesnull, int[] agesdefault ) {
 		String result = ("name=" + name + ", sex=" + request.getParameter("sex")
 				+ ", sexes=" + Arrays.toString(request.getParameterValues("sexes"))
 				+ ", age=" + age + ", agenull=" + agenull + ", agedefault=" + agedefault
@@ -92,10 +117,18 @@ public class ParamAction extends WebappBaseAction {
 	 * 		requestParameter.put( "age", new String[]{"777"} );
 	 * 		requestParameter.put( "ages", new String[]{"10", "11", "12"} );
 	 */
+	@Param(name = "name",desc = "test", range = "..")
+	@Param(name = "request",desc = "test", range = "..")
+	@Param(name = "age",desc = "test", range = "..")
+	@Param(name = "agenull",nullable = true, desc = "test", range = "..")
+	@Param(name = "agedefault",valueIfNull = {"1"}, desc = "test", range = "..")
+	@Param(name = "ages",desc = "test", range = "..")
+	@Param(name = "agesnull",nullable = true, desc = "test", range = "..")
+	@Param(name = "agesdefault",valueIfNull = {"2", "3"}, desc = "test", range = "..")
 	public String testParamsInteger(
 			String name, HttpServletRequest request,
-			Integer age, @RequestParam(nullable = true) Integer agenull, @RequestParam(valueIfNull = {"1"}) Integer agedefault,
-			Integer[] ages, @RequestParam(nullable = true) Integer[] agesnull, @RequestParam(valueIfNull = {"2","3"}) Integer[] agesdefault ) {
+			Integer age, Integer agenull, Integer agedefault,
+			Integer[] ages, Integer[] agesnull, Integer[] agesdefault ) {
 		String result = ("name=" + name + ", sex=" + request.getParameter("sex")
 				+ ", sexes=" + Arrays.toString(request.getParameterValues("sexes"))
 				+ ", age=" + age + ", agenull=" + agenull + ", agedefault=" + agedefault
@@ -113,10 +146,18 @@ public class ParamAction extends WebappBaseAction {
 	 * 		requestParameter.put( "age", new String[]{"777"} );
 	 * 		requestParameter.put( "ages", new String[]{"10", "11", "12"} );
 	 */
+	@Param(name = "name",desc = "test", range = "..")
+	@Param(name = "request",desc = "test", range = "..")
+	@Param(name = "age",desc = "test", range = "..")
+	@Param(name = "agenull",nullable = true, desc = "test", range = "..")
+	@Param(name = "agedefault",valueIfNull = {"1"}, desc = "test", range = "..")
+	@Param(name = "ages",desc = "test", range = "..")
+	@Param(name = "agesnull",nullable = true, desc = "test", range = "..")
+	@Param(name = "agesdefault",valueIfNull = {"2", "3"}, desc = "test", range = "..")
 	public String testParamsBigDecimal(
 			String name, HttpServletRequest request,
-			BigDecimal age, @RequestParam(nullable = true) BigDecimal agenull, @RequestParam(valueIfNull = {"1"}) BigDecimal agedefault,
-			BigDecimal[] ages, @RequestParam(nullable = true) BigDecimal[] agesnull, @RequestParam(valueIfNull = {"2","3"}) BigDecimal[] agesdefault ) {
+			BigDecimal age, BigDecimal agenull, BigDecimal agedefault,
+			BigDecimal[] ages, BigDecimal[] agesnull, BigDecimal[] agesdefault ) {
 		String result = ("name=" + name + ", sex=" + request.getParameter("sex")
 				+ ", sexes=" + Arrays.toString(request.getParameterValues("sexes"))
 				+ ", age=" + age + ", agenull=" + agenull + ", agedefault=" + agedefault

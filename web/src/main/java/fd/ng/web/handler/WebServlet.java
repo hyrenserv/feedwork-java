@@ -5,6 +5,7 @@ import fd.ng.core.exception.BusinessProcessException;
 import fd.ng.core.exception.BusinessSystemException;
 import fd.ng.core.exception.internal.FrameworkRuntimeException;
 import fd.ng.core.exception.internal.RawlayerRuntimeException;
+import fd.ng.core.exception.internal.RuntimeOnlyMessageException;
 import fd.ng.core.utils.UuidUtil;
 import fd.ng.web.action.AbstractBaseAction;
 import fd.ng.web.action.ActionResult;
@@ -84,7 +85,7 @@ public class WebServlet extends HttpServlet {
 				}
 			} catch (Exception e) {
 				// 理论上，这里不需要执行doExceptionProcess，因为异常走到这里，肯定不是Action中的方法产生的。
-				logger.error("Other Exception : " + e.getMessage());
+				logger.error("Raise Exception by URI : " + pathInfo, e);
 				doExceptionProcess(request, response);
 				if (e instanceof BaseInternalRuntimeException)
 					dealFrameworkInternalException(request, response, e);
@@ -170,6 +171,8 @@ public class WebServlet extends HttpServlet {
 			// 因为在构造异常的时候已经 log 了异常堆栈，所以，这里仅打印 URI 和错误码，不需要打印异常堆栈
 			logger.error(Loghelper.fitMessage("url=%s %s", request.getRequestURI(), errCode));
 			ResponseUtil.writeSystemError(response, errMsgAndCode);
+		} else if (t instanceof RuntimeOnlyMessageException) {
+			ResponseUtil.writeActionBizError(response, (BusinessProcessException)t);
 		} else { // 绝对不应该走到这个分支
 			logger.fatal(Loghelper.fitMessage("programe error! URL="+request.getRequestURI()), t);
 			writeUnknownedSystemException(request, response, t);

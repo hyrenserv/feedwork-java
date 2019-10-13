@@ -1,6 +1,6 @@
 package fd.ng.web.action.actioninstancehelper.normal;
 
-import fd.ng.web.annotation.RequestBean;
+import fd.ng.core.annotation.Param;
 import fd.ng.web.hmfmswebapp.WebappBaseAction;
 import fd.ng.web.hmfmswebapp.a0101.Person;
 import org.apache.logging.log4j.LogManager;
@@ -21,13 +21,17 @@ public class NormalAction extends WebappBaseAction {
 		return "welcome ";
 	}
 
+	@Param(name="username", desc = "", range = "")
+	@Param(name="password", desc = "", range = "")
 	public String welcome1(String username, String password) {
 		return "welcome " + username + " : " + password;
 	}
 
 	// 和 Action3 中方法重名，用于验证：同一个包下跨Action不能有重名方法
+	@Param(name="request", desc = "", range = "")
+	@Param(name="person", isBean = true, desc = "", range = "")
 	public boolean signin(HttpServletRequest request,
-	                      @RequestBean Person person) {
+	                      Person person) {
 		return true;
 	}
 }

@@ -1,6 +1,7 @@
 package fd.ng.web.hmfmswebapp.json;
 
 import com.google.gson.reflect.TypeToken;
+import fd.ng.core.annotation.Param;
 import fd.ng.web.action.ActionResult;
 import fd.ng.web.action.ActionResultHelper;
 import fd.ng.web.annotation.Action;
@@ -24,6 +25,8 @@ public class SomthingAction extends WebappBaseAction {
 		return json;
 	}
 
+	@Param(name = "username",desc = "test", range = "..")
+	@Param(name = "password",desc = "test", range = "..")
 	public ActionResult loginAtSession(String username, String password) {
 		if("admin".equalsIgnoreCase(username)&&"admin".equalsIgnoreCase(password)) {
 			long id = System.currentTimeMillis();
@@ -84,6 +87,8 @@ public class SomthingAction extends WebappBaseAction {
 
 	// --------- Cookie ------------
 
+	@Param(name = "username",desc = "test", range = "..")
+	@Param(name = "password",desc = "test", range = "..")
 	public ActionResult loginAtCookie(String username, String password) {
 		if("admin".equalsIgnoreCase(username)&&"admin".equalsIgnoreCase(password)) {
 			long id = System.currentTimeMillis();

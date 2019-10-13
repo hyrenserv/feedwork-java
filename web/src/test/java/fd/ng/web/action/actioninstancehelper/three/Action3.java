@@ -1,6 +1,6 @@
 package fd.ng.web.action.actioninstancehelper.three;
 
-import fd.ng.web.annotation.RequestBean;
+import fd.ng.core.annotation.Param;
 import fd.ng.web.hmfmswebapp.WebappBaseAction;
 import fd.ng.web.hmfmswebapp.a0101.Person;
 import org.apache.logging.log4j.LogManager;
@@ -16,8 +16,10 @@ public class Action3 extends WebappBaseAction {
 		return "welcome 3";
 	}
 
+	@Param(name="request", desc = "", range = "")
+	@Param(name="person", isBean = true, desc = "", range = "")
 	public boolean signin(HttpServletRequest request,
-	                      @RequestBean Person person) {
+	                      Person person) {
 		return true;
 	}
 }

@@ -1,9 +1,9 @@
 package fd.ng.web.hmfmswebapp.upload;
 
+import fd.ng.core.annotation.Param;
 import fd.ng.core.exception.BusinessSystemException;
 import fd.ng.core.utils.CodecUtil;
 import fd.ng.core.utils.FileUtil;
-import fd.ng.web.annotation.RequestParam;
 import fd.ng.web.annotation.UploadFile;
 import fd.ng.web.fileupload.FileItem;
 import fd.ng.web.fileupload.FileUploadException;
@@ -29,15 +29,25 @@ import java.util.List;
 public class FileUploadAction extends WebappBaseAction {
 	private static final Logger logger = LogManager.getLogger(FileUploadAction.class.getName());
 
+	@Param(name = "username",desc = "test", range = "..")
+	@Param(name = "age",desc = "test", range = "..")
 	public String welcome(String username, int age) {
 		return "username="+username+", age="+age;
 	}
+
 	// savedDir 不需要指定，除非有什么特殊目的
 	@UploadFile(savedDir = "/tmp")
+	@Param(name = "userid",desc = "test", range = "..")
+	@Param(name = "filelabel",desc = "test", range = "..")
+	@Param(name = "addr",desc = "test", range = "..")
+	@Param(name = "filesRoot",desc = "test", range = "..")
+	@Param(name = "file_group1",desc = "test", range = "..")
+	@Param(name = "file_group2",nullable = true, desc = "test", range = "..")
+	@Param(name = "hiddenval",nullable = true, desc = "test", range = "..")
 	public String uploadfiles(String userid, int filelabel, String addr,
 	                          String filesRoot, // 把接收到的文件保存到这个目录中
-	                          String[] file_group1, @RequestParam(nullable = true) String file_group2,
-	                          @RequestParam(nullable = true) String[] hiddenval) throws IOException {
+	                          String[] file_group1, String file_group2,
+	                          String[] hiddenval) throws IOException {
 		// 通过file的值，提供公共函数用于获取各种属性
 		for(String f1_newFileinfo : file_group1) {
 			File f1_newFile = FileUploadUtil.getUploadedFile(f1_newFileinfo);

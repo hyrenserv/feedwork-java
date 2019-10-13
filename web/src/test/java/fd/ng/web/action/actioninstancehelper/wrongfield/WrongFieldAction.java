@@ -1,7 +1,7 @@
 package fd.ng.web.action.actioninstancehelper.wrongfield;
 
+import fd.ng.core.annotation.Param;
 import fd.ng.web.action.actioninstancehelper.WrongBase1Action;
-import fd.ng.web.annotation.RequestBean;
 import fd.ng.web.hmfmswebapp.a0101.Person;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,11 +20,15 @@ public class WrongFieldAction extends WrongBase1Action {
 	private String privateFieldWrong;
 	protected String protectedFieldWrong;
 
+	@Param(name="username", desc = "", range = "")
+	@Param(name="password", desc = "", range = "")
 	public String welcome(String username, String password) {
 		return "welcome " + username + " : " + password;
 	}
-	public boolean signin(HttpServletRequest request,
-	                      @RequestBean Person person) {
+
+	@Param(name="request", desc = "", range = "")
+	@Param(name="person", isBean = true, desc = "", range = "")
+	public boolean signin(HttpServletRequest request, Person person) {
 		return true;
 	}
 }

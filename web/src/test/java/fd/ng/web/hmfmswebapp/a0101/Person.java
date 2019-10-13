@@ -1,7 +1,6 @@
 package fd.ng.web.hmfmswebapp.a0101;
 
-import fd.ng.web.annotation.RequestBean;
-import fd.ng.web.annotation.RequestParam;
+import fd.ng.core.annotation.Param;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -11,9 +10,9 @@ public class Person {
 	private int age;
 	private String sex;
 	private String[] favors;
-	@RequestParam(name = "money")
+	@Param(alias = "money",desc = "test", range = "..")
 	private BigDecimal amt;
-	@RequestBean
+	@Param(isBean = true, desc = "test", range = "..")
 	private PersonWomen wife;
 
 	public Person() {}

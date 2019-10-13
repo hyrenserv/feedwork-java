@@ -1,6 +1,7 @@
 package fd.ng.web.hmfmswebapp.login;
 
 import com.google.gson.reflect.TypeToken;
+import fd.ng.core.annotation.Param;
 import fd.ng.web.action.ActionResult;
 import fd.ng.web.action.ActionResultHelper;
 import fd.ng.web.annotation.Action;
@@ -17,7 +18,8 @@ import java.util.*;
 public class LoginAction extends WebappBaseAction {
 	private static final Logger logger = LogManager.getLogger();
 
-	// http://localhost:8080/fdwebtest/action/fd/ng/web/hmfmswebapp/login/dologin/loginAtSession?username=admin&password=admin
+	@Param(name = "username",desc = "test", range = "..")
+	@Param(name = "password",desc = "test", range = "..")
 	public ActionResult loginAtSession(String username, String password) {
 		if("admin".equalsIgnoreCase(username)&&"admin".equalsIgnoreCase(password)) {
 			long id = System.currentTimeMillis();
@@ -82,6 +84,8 @@ public class LoginAction extends WebappBaseAction {
 
 	// --------- Cookie ------------
 
+	@Param(name = "username",desc = "test", range = "..")
+	@Param(name = "password",desc = "test", range = "..")
 	public ActionResult loginAtCookie(String username, String password) {
 		if("admin".equalsIgnoreCase(username)&&"admin".equalsIgnoreCase(password)) {
 			long id = System.currentTimeMillis();

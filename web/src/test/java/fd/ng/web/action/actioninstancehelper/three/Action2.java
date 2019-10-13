@@ -1,5 +1,6 @@
 package fd.ng.web.action.actioninstancehelper.three;
 
+import fd.ng.core.annotation.Param;
 import fd.ng.web.hmfmswebapp.WebappBaseAction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,6 +13,8 @@ public class Action2 extends WebappBaseAction {
 		return "welcome 2";
 	}
 
+	@Param(name="username", desc = "", range = "")
+	@Param(name="password", isBean = true, desc = "", range = "")
 	public String welcome(String username, String password) {
 		return "welcome " + username + " : " + password;
 	}

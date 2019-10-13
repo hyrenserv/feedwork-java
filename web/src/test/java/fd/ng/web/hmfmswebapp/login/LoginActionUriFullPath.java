@@ -1,6 +1,7 @@
 package fd.ng.web.hmfmswebapp.login;
 
 import com.google.gson.reflect.TypeToken;
+import fd.ng.core.annotation.Param;
 import fd.ng.web.action.ActionResult;
 import fd.ng.web.action.ActionResultHelper;
 import fd.ng.web.annotation.Action;
@@ -14,6 +15,8 @@ import java.util.Map;
 
 @Action(UriExt= "^/fd/ng/web/hmfmswebapp/loginfullpath")
 public class LoginActionUriFullPath extends WebappBaseAction {
+	@Param(name = "username",desc = "test", range = "..")
+	@Param(name = "password",desc = "test", range = "..")
 	public ActionResult loginSession(String username, String password) {
 		if("admin".equalsIgnoreCase(username)&&"admin".equalsIgnoreCase(password)) {
 			long id = System.currentTimeMillis();
@@ -33,6 +36,8 @@ public class LoginActionUriFullPath extends WebappBaseAction {
 			return ActionResultHelper.bizError("login failed!");
 	}
 
+	@Param(name = "username",desc = "test", range = "..")
+	@Param(name = "password",desc = "test", range = "..")
 	public ActionResult loginCookie(String username, String password) {
 		if("admin".equalsIgnoreCase(username)&&"admin".equalsIgnoreCase(password)) {
 			long id = System.currentTimeMillis();

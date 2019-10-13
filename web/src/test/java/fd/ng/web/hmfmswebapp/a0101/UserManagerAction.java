@@ -1,5 +1,6 @@
 package fd.ng.web.hmfmswebapp.a0101;
 
+import fd.ng.core.annotation.Param;
 import fd.ng.core.utils.DateUtil;
 import fd.ng.db.conf.DbinfosConf;
 import fd.ng.db.jdbc.DatabaseWrapper;
@@ -7,7 +8,6 @@ import fd.ng.db.jdbc.DefaultPageImpl;
 import fd.ng.db.jdbc.Page;
 import fd.ng.web.util.Dbo;
 import fd.ng.db.resultset.Result;
-import fd.ng.web.annotation.RequestBean;
 import fd.ng.web.exception.AppSystemException;
 import fd.ng.web.exception.BusinessException;
 import fd.ng.web.util.RequestUtil;
@@ -70,6 +70,7 @@ public class UserManagerAction extends WebappBaseAction {
 		return true;
 	}
 
+	@Param(name = "name",desc = "test", range = "..")
 	public Map<String, Object> welcome(String name) {
 		Person person = new Person(name, 99, "男", new String[]{"xxx", "yyy"}, new BigDecimal("234.99"));
 		Map<String, Object> map = new HashMap<>();
@@ -88,7 +89,8 @@ public class UserManagerAction extends WebappBaseAction {
 		return map;
 	}
 
-	public Map<String, Object> bean(@RequestBean Person person) {
+	@Param(name = "person", isBean = true,desc = "test", range = "..")
+	public Map<String, Object> bean(Person person) {
 		Map<String, Object> map = new HashMap<>();
 		map.put("person", person);
 		map.put("action", "welcome");
@@ -146,6 +148,8 @@ public class UserManagerAction extends WebappBaseAction {
 
 	// ---------------  测试有数据操作的功能  ---------------
 
+	@Param(name = "name",desc = "test", range = "..")
+	@Param(name = "age",desc = "test", range = "..")
 	public boolean addUser(String name, int age) {
 		int nums = Dbo.execute(
 				"insert into "+ UserForTestTable.TableName +
@@ -155,12 +159,15 @@ public class UserManagerAction extends WebappBaseAction {
 		if( nums==1 ) return true;
 		else throw new BusinessException("失败");
 	}
+	@Param(name = "user", isBean = true,desc = "test", range = "..")
 	public boolean addUserByEntity(UserForTestTable user) {
 		int nums = user.add(Dbo.db());
 		if( nums==1 ) return true;
 		else return false;
 	}
 
+	@Param(name = "name",desc = "test", range = "..")
+	@Param(name = "age",desc = "test", range = "..")
 	public void updateUser(String name, int age) {
 		UserForTestTable user = new UserForTestTable();
 		user.setName(name);
@@ -169,6 +176,7 @@ public class UserManagerAction extends WebappBaseAction {
 			throw new BusinessException( String.format("更新数据失败！name=%s, age=%s", name, age) );
 	}
 
+	@Param(name = "name",desc = "test", range = "..")
 	public boolean delUser(String name) {
 		int nums = Dbo.execute("delete from "+ UserForTestTable.TableName+" where name = ?", name);
 		if( nums==1 ) return true;
@@ -186,11 +194,15 @@ public class UserManagerAction extends WebappBaseAction {
 //				"select * from "+ UserForTestTable.TableName+" where name=?", name);
 //		return result.get();
 //	}
+
+	@Param(name = "name",desc = "test", range = "..")
 	public Optional<UserForTestTable> getUser(String name) {
 		return Dbo.queryOneObject(UserForTestTable.class,
 				"select * from "+ UserForTestTable.TableName + " where name=?", name);
 	}
 
+	@Param(name = "currPage",desc = "当前显示数据的页号", range = "大于0")
+	@Param(name = "pageSize",desc = "每页条数", range = "大于0")
 	public Map<String, Object> getPagedUserResult(int currPage, int pageSize) {
 		Page page = new DefaultPageImpl(currPage, pageSize);
 		Result result0 = Dbo.queryPagedResult(page,
@@ -201,6 +213,8 @@ public class UserManagerAction extends WebappBaseAction {
 		return result;
 	}
 
+	@Param(name = "currPage",desc = "当前显示数据的页号", range = "大于0")
+	@Param(name = "pageSize",desc = "每页条数", range = "大于0")
 	public Map<String, Object> getPagedUserResultNoCount(int currPage, int pageSize) {
 		Page page = new DefaultPageImpl(currPage, pageSize, false);
 		Result result0 = Dbo.queryPagedResult(page,
@@ -211,6 +225,8 @@ public class UserManagerAction extends WebappBaseAction {
 		return result;
 	}
 
+	@Param(name = "currPage",desc = "当前显示数据的页号", range = "大于0")
+	@Param(name = "pageSize",desc = "每页条数", range = "大于0")
 	public List<UserForTestTable> getPagedUsers(int currPage, int pageSize) {
 		UserForTestTable user = new UserForTestTable();
 		Page page = new DefaultPageImpl(currPage, pageSize);

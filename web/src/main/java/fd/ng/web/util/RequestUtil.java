@@ -1,10 +1,9 @@
 package fd.ng.web.util;
 
+import fd.ng.core.annotation.Param;
 import fd.ng.core.exception.internal.FrameworkRuntimeException;
 import fd.ng.core.exception.internal.RawlayerRuntimeException;
 import fd.ng.core.utils.*;
-import fd.ng.web.annotation.RequestBean;
-import fd.ng.web.annotation.RequestParam;
 import fd.ng.web.conf.WebinfoConf;
 import fd.ng.web.helper.HttpDataHolder;
 import org.apache.logging.log4j.LogManager;
@@ -81,17 +80,17 @@ public class RequestUtil {
 				// 获取bean属性对象的注解信息
 				Field field = beanFields.get(propName);
 				if(field!=null) {
-					RequestBean propAnnoBean = field.getAnnotation(RequestBean.class);
-					if (propAnnoBean != null) { // 该属性被被定义为RequestBean
-						Object innerBean = buildBeanFromRequest(parameterMap, propType);
-						propSetter.invoke(bean, innerBean);
-						continue;
-					}
-					RequestParam propAnnoParam = field.getAnnotation(RequestParam.class);
-					if (propAnnoParam != null) { // 该属性被被定义为RequestParam
-						String alias = propAnnoParam.name();
-						if (StringUtil.isNotEmpty(alias))
-							reqFieldName = alias;
+					Param propAnno = field.getAnnotation(Param.class);
+					if (propAnno != null) {
+						if(propAnno.isBean()) {// 该属性被被定义为RequestBean
+							Object innerBean = buildBeanFromRequest(parameterMap, propType);
+							propSetter.invoke(bean, innerBean);
+							continue;
+						} else {
+							String alias = propAnno.alias();
+							if (StringUtil.isNotEmpty(alias))
+								reqFieldName = alias;
+						}
 					}
 				}
 

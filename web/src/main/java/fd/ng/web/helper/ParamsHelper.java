@@ -1,5 +1,6 @@
 package fd.ng.web.helper;
 
+import fd.ng.core.annotation.ParamValue;
 import fd.ng.core.bean.FeedBean;
 import fd.ng.core.exception.BusinessProcessException;
 import fd.ng.core.exception.internal.FrameworkRuntimeException;
@@ -25,8 +26,8 @@ public class ParamsHelper {
 	private static final Object[] EMPTY_ARGS = new Object[]{}; // 方法无参数时，赋予invode调用的值
 
 	public static Object[] autowireParameters(final HttpServletRequest request, final Method actionMethod) {
-//		long start = 0;
-//		if(logger.isDebugEnabled()) start = System.currentTimeMillis();
+		long start = 0;
+		if(logger.isTraceEnabled()) start = System.currentTimeMillis();
 
 		Map<String, String[]> parameterMap;
 		UploadFile uploadFileAnno = actionMethod.getAnnotation(UploadFile.class);
@@ -34,16 +35,26 @@ public class ParamsHelper {
 			parameterMap = request.getParameterMap();
 		else
 			parameterMap = genParameterMapForFileUpload(request, uploadFileAnno);
-		//Class<?>[] paramTypes = actionMethod.getParameterTypes(); // 每个参数对象的类型
+
 		Parameter[] parameters = actionMethod.getParameters();
+		final int paramSize = parameters.length;
 		if(parameters.length==0) return EMPTY_ARGS; // 该方法无参数
 
-		Object[] paramsValueObject = new Object[parameters.length]; // 用于存储每个参数的值
+		Map<String, ParamValue> paramValueMap = ActionInstanceHelper.getActionMethodParamMap(actionMethod);
+		if(paramValueMap==null) // 能走到这里，意味着parameters.length大于0，就意味着有参数，那么就必须有注解
+			throw new BusinessProcessException(
+					String.format("[%s] Cannot get 'Param' annotation!", HttpDataHolder.getBizId()));
+		else if(paramValueMap.size()!=paramSize)
+			throw new BusinessProcessException(
+					String.format("[%s] 'Param' annotation size(%d) must equals method's parameters(%d)!",
+							HttpDataHolder.getBizId(), paramValueMap.size(), paramSize));
+
+		Object[] paramsValueObject = new Object[paramSize]; // 用于存储每个参数的值
 		//Arrays.fill(paramsValueObject, null);
 		StringJoiner sj = new StringJoiner(", "); // 记录不合法的参数
-		int paramSize = parameters.length;
 		for(int i=0; i<paramSize; i++) {
 			Parameter param = parameters[i]; // 方法的参数对象
+			String reqParamName = param.getName(); // 该参数在 request 中的名字。默认就是参数名
 			Class<?> paramType = param.getType(); // 方法的参数类型
 			/** 【1】 处理 HttpServletRequest 和 Bean 类型的参数 */
 			if(HttpServletRequest.class.isAssignableFrom(paramType)) { // 当前参数是HttpServletRequest
@@ -54,26 +65,30 @@ public class ParamsHelper {
 				paramsValueObject[i] = RequestUtil.buildBeanFromRequest(request, paramType);
 				continue;
 			}
-			if(param.isAnnotationPresent(RequestBean.class)) { // 该参数定义了RequestBean注解，意味着是一个Bean
+
+			ParamValue paramValue = paramValueMap.get(reqParamName);
+			if(paramValue==null)
+				throw new BusinessProcessException(
+						String.format("%s Error method parameter annotation value for param : %s",
+								HttpDataHolder.getBizId(), reqParamName));
+
+			if(paramValue.isBean) { // 该参数是一个Bean
 				paramsValueObject[i] = RequestUtil.buildBeanFromRequest(request, paramType);
 				continue;
 			}
-			String reqParamName = param.getName(); // 该参数在 request 中的名字。默认就是参数名
 			boolean required = true;
 			String[] defaultValue = null;
 			/** 【2】 根据当前参数的注解，设置参数名、是否可空、默认值 */
-			RequestParam annoRequestParam = param.getAnnotation(RequestParam.class);
-			if(annoRequestParam!=null) { // 该参数定义了RequestParam注解，意味着是一个主类型
-				if(annoRequestParam.ignore()) continue;
-				String aliasName = annoRequestParam.name();
-				if(StringUtil.isNotEmpty(aliasName)) reqParamName = aliasName;
-				required = !annoRequestParam.nullable();
-				String[] defaultValue0 = annoRequestParam.valueIfNull();
-				if(ArrayUtil.isNotEmpty(defaultValue0)) {
-					defaultValue = defaultValue0;
-					required = false; // 设置了默认值，那么就意味着该参数可以为空（agreeNull注解的值成为无效设置）
-				}
+			if(paramValue.ignore) continue;
+			String aliasName = paramValue.alias;
+			if(StringUtil.isNotEmpty(aliasName)) reqParamName = aliasName;
+			required = !paramValue.nullable;
+			String[] defaultValue0 = paramValue.valueIfNull;
+			if(ArrayUtil.isNotEmpty(defaultValue0)) {
+				defaultValue = defaultValue0;
+				required = false; // 设置了默认值，那么就意味着该参数可以为空（agreeNull注解的值成为无效设置）
 			}
+
 			String[] paramValueArr = getOrNull(parameterMap, reqParamName);  // 从 request 中取值
 			if(required) { // 值不允许null。即：没有设置注解、 agreeNull 设置为false、没有设置明确设置 agreeNull
 				if(paramValueArr==null) {
@@ -99,10 +114,10 @@ public class ParamsHelper {
 			}
 		}
 
-//		if(logger.isDebugEnabled()) {
-//			logger.debug("  [bizid:{}] autowire parameters processing time : {}", Thread.currentThread().getId(),
-//					(System.currentTimeMillis() - start));
-//		}
+		if(logger.isTraceEnabled()) {
+			logger.trace("  [bizid:{}] autowire parameters processing time : {}", Thread.currentThread().getId(),
+					(System.currentTimeMillis() - start));
+		}
 		if(sj.length()>0) {
 			logger.error(String.format("URL=[%s], ActionMethod=[%s] 处理失败。%n发生错误的参数： %s%n发生错误的原因：%n  %s%n  %s%n  %s"
 					,request.getPathInfo(), actionMethod.getName(), sj.toString()
@@ -111,112 +126,6 @@ public class ParamsHelper {
 					,"3）参数是 JavaBean 类型，但是没有使用 RequestBean 注解"));
 			throw new BusinessProcessException(
 					String.format("error request parameters : (%s)", sj.toString()));
-		}
-		return paramsValueObject;
-	}
-
-	public static Object[] assignParameters(final Method actionMethod, final HttpServletRequest request) {
-		//testPerfRequestGet(request);
-		long start = 0;
-		if(logger.isDebugEnabled()) start = System.currentTimeMillis();
-		Object[] args = assignParameters(actionMethod, request.getParameterMap(), request);
-		if(logger.isDebugEnabled()) {
-			logger.debug("  [bizid:{}] assignParameters Processing time : {}", Thread.currentThread().getId(),
-					(System.currentTimeMillis() - start));
-		}
-		return args;
-	}
-
-	/**
-	 *
-	 * @param actionMethod
-	 * @param parameterMap
-	 * @param request HttpServletRequest 传入这个参数，仅仅是为了对这种参数的方法，方便返回HttpServletRequest对象而已。
-	 * @return
-	 */
-	public static Object[] assignParameters(final Method actionMethod, final Map<String, String[]> parameterMap, final HttpServletRequest request) {
-		Class<?>[] methodParamTypes = actionMethod.getParameterTypes(); // 每个参数对象的类型
-		if(methodParamTypes.length==0) return EMPTY_ARGS; // 该方法无参数
-		else if(methodParamTypes.length==1&&methodParamTypes[0].isAssignableFrom(HttpServletRequest.class))
-			return new Object[]{request}; // 该方法仅有一个HttpServletRequest参数
-		// 注解形如： @Params("String username, int age, String sex:null, String[] addr")
-		Params params = actionMethod.getAnnotation(Params.class); // 得到该方法的 Params 注解
-		if(params==null) { // 有参数且不是request，那么必须定义注解
-//			if(methodParamTypes.length!=1 || !(methodParamTypes[0].isAssignableFrom(HttpServletRequest.class)) )
-				throw new BusinessProcessException(
-						String.format("Action方法：%s(...) 定义不合法： " +
-										"必须通过Params注解定义参数，或者定义为一个 HttpServletRequest 类型的参数。"
-								, actionMethod.getName()));
-		}
-		List<String> annoParamArr = StringUtil.split(params.value(), ","); // 注解中的每个参数定义
-		if(logger.isTraceEnabled()) {
-			if(annoParamArr.size()!=methodParamTypes.length) {
-				logger.trace(
-						String.format("%s 方法的注解中配置的参数个数(=%d)，与方法的参数个数(=%d)不一致",
-						actionMethod.getName(), annoParamArr.size(), methodParamTypes.length));
-			}
-		}
-
-		Object[] paramsValueObject = new Object[methodParamTypes.length]; // 用于存储每个参数的值
-		Arrays.fill(paramsValueObject, null);
-		int loops = annoParamArr.size();
-		if(methodParamTypes.length<loops) loops = methodParamTypes.length; // 方法参数个数比注解中的少
-		for(int i=0; i<loops; i++) {
-			if(HttpServletRequest.class.isAssignableFrom(methodParamTypes[i])) { // 当前参数是HttpServletRequest
-				paramsValueObject[i] = request;
-				continue;
-//			} else if(EntityBean.class.isAssignableFrom(methodParamTypes[i])) {
-//				paramsValueObject[i] = RequestUtil.buildBeanFromRequest(request, methodParamTypes[i]);
-//				continue;
-			}
-			if(methodParamTypes[i].getAnnotation(RequestBean.class)!=null) {
-					paramsValueObject[i] = RequestUtil.buildBeanFromRequest(request, methodParamTypes[i]);
-					continue;
-			}
-			/** 【1】 首先把每个注解参数，用空格进行分割
-			 * 因为注解里的每个参数是用空格分隔的（也允许没有空格）
-			 * 形如： "String username, int age, String sex:null, String[] addr"
-			 */
-			List<String> oneAnnoParam = StringUtil.split(annoParamArr.get(i).trim(), " ");
-			String paramName; // 例如： name:null
-			if(oneAnnoParam.size()==1) paramName = oneAnnoParam.get(0); // 没有空格分隔的情况，如：@Params("name, favors")
-			else if(oneAnnoParam.size()==2) paramName = oneAnnoParam.get(1);
-			else {
-				throw new BusinessProcessException(
-						String.format("Action方法：%s(...)的Params注解里面的参数:[%s]不合法（被分割为%d个）。正确格式例如： String name 或 String name:null 或 name",
-								actionMethod.getName(), annoParamArr.get(i), oneAnnoParam.size()));
-			}
-			/** 【2】 判断是否[ :null ]结尾，用于处理是否允许被设置成 null。 */
-			int canBeNull = paramName.indexOf(":null");
-			if(canBeNull>0) paramName = paramName.substring(0, canBeNull);
-			String[] paramValueArr = parameterMap.get(paramName);
-			if(canBeNull<0) { // 注解中不允许null
-				if(paramValueArr==null || paramValueArr.length==0
-						|| ( paramValueArr.length==1&&StringUtil.isEmpty(paramValueArr[0]) ) ) { // 不是数组且为空
-					// 从request中取值为null
-					logger.error(String.format("Action方法：%s(...) 的第[%d]个参数不允许为空，" +
-									"但是，request中，这个参数取值为 null。原因：" +
-									"1）方法的第[%d]个参数在注解定义的名字(%s)写错了；2）前端没有提交数据；" +
-									"3）如果这个参数是 JavaBean 类型，那么必须定义 RequestBean 注解。"
-							, actionMethod.getName(), (i+1), (i+1), paramName));
-					throw new BusinessProcessException(
-							String.format("error request parameters : (%s)", paramName));
-				}
-			} else { // 注解中允许空
-				if(paramValueArr==null || paramValueArr.length==0
-						|| ( paramValueArr.length==1&&StringUtil.isEmpty(paramValueArr[0]) ) ) { // 不是数组且为空
-					// 从request中取值为null，则不需要做赋值处理了。因为已经初始化为null了
-					continue;
-				}
-			}
-			/** 【3】 为方法参数赋值 */
-			try {
-				paramsValueObject[i] = BeanUtil.castStringToClass(paramValueArr, methodParamTypes[i]);
-			} catch (BeanUtil.ArgumentNullvalueException anvex) {
-				throw new FrameworkRuntimeException(String.format("argument:%s(%s) must not be null!", paramName, methodParamTypes[i].getSimpleName()));
-			} catch (BeanUtil.ArgumentUnsupportedTypeException autex) {
-				throw new FrameworkRuntimeException(String.format("argument:%s 's type:%s is Unsupported!", paramName, methodParamTypes[i].getSimpleName()));
-			}
 		}
 		return paramsValueObject;
 	}

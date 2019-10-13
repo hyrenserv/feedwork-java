@@ -1,11 +1,11 @@
 package fd.ng.web.hmfmswebapp.a0101;
 
-import fd.ng.web.annotation.RequestParam;
+import fd.ng.core.annotation.Param;
 
 import java.util.StringJoiner;
 
 public class PersonWomen {
-	@RequestParam(name = "name")
+	@Param(alias = "name",desc = "test", range = "..")
 	private String husbandName;
 	private int age;
 	private String sex;

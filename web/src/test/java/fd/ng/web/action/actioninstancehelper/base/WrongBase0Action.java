@@ -1,5 +1,6 @@
 package fd.ng.web.action.actioninstancehelper.base;
 
+import fd.ng.core.annotation.Param;
 import fd.ng.web.hmfmswebapp.WebappBaseAction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,6 +24,8 @@ public  class WrongBase0Action extends WebappBaseAction {
 	public void public0() {
 
 	}
+
+	@Param(name="i", desc = "", range = "")
 	public void public0(int i) {
 
 	}

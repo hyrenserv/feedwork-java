@@ -1,11 +1,13 @@
-package fd.ng.core.docannotation;
+package fd.ng.core.annotation;
 
+
+import fd.ng.core.annotation.Param;
 
 import java.lang.annotation.*;
 
 @Inherited
 @Target({ElementType.METHOD,ElementType.FIELD})
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Params {
 	Param[] value();
 }

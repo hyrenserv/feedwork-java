@@ -314,16 +314,16 @@ public final class ActionInstanceHelper
 	// 检查方法的每个注解中的name是否与参数匹配
 	private static void checkParamAnno(Class<?> actionClass, Method actionMethod, Map<String, ParamValue> paramMap) {
 		Parameter[] parameters = actionMethod.getParameters();
-		String errMsg = "";
+		StringBuilder errMsg = new StringBuilder();
 		for(Parameter parameter : parameters) {
 			String paramName = parameter.getName();
 			if(!paramMap.containsKey(paramName)) {
-				errMsg = errMsg + String.format("  Param [%-10s] no matched Param Annotation.%n", paramName);
+				errMsg.append(String.format("  Param [%-10s] no matched Param Annotation.%n", paramName));
 			}
 		}
 		if(errMsg.length()>0)
 			throw new Error(String.format("Action [%s] 's Method [%s] Param Error :%n%s",
-					actionClass.getSimpleName(), actionMethod.getName(), errMsg));
+					actionClass.getSimpleName(), actionMethod.getName(), errMsg.toString()));
 	}
 	private static void putActionErrorMsg(Map<Class<?>, String> wrongActions, Class<?> actionClass, String errMsg) {
 		if(wrongActions.containsKey(actionClass)) {

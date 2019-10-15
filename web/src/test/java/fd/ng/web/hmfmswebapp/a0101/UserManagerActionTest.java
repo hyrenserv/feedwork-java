@@ -54,14 +54,14 @@ public class UserManagerActionTest extends WebBaseTestCase {
 
 	@Test
 	public void postBigData() {
-		String str = "";
+		StringBuilder str = new StringBuilder();
 		for(int i=0; i<5000; i++) {
-			str += "1234567890";
+			str.append("1234567890");
 		}
 		TestCaseLog.println("post data length="+str.length());
 
 		String responseValue = new HttpClient()
-				.addData("name", str)
+				.addData("name", str.toString())
 				.post(getActionUrl("welcome"))
 				.getBodyString();
 //		String responseValue = post(getActionUrl("welcome"), new String[][]{

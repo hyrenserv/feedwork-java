@@ -482,7 +482,7 @@ public class FileUtil {
 	 * When using jdk1.7, this method delegates to {@code boolean java.nio.file.Files.isSymbolicLink(Path path)}
 	 *
 	 * <b>Note:</b> the current implementation always returns {@code false} if running on
-	 * jkd1.6 and the system is detected as Windows using {@link FilenameUtils#isSystemWindows()}
+	 * jkd1.6 and the system is detected as Windows using {@link FileNameUtils#isSystemWindows()}
 	 * <p>
 	 * For code that runs on Java 1.7 or later, use the following method instead:
 	 * <br>

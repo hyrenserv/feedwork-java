@@ -1,5 +1,8 @@
 package fd.ng.core.utils;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,6 +17,7 @@ import java.security.NoSuchAlgorithmException;
  * @create: 2019-10-11 10:28
  */
 public class MD5Util {
+	private static final Logger logger = LogManager.getLogger();
 
 	/**
 	 * 计算一个字符串的md5
@@ -32,7 +36,7 @@ public class MD5Util {
 				sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).toUpperCase().substring(1, 3));
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("MD5 mart failed"+src, e);
 		}
 		return sb.toString();
 	}
@@ -66,9 +70,9 @@ public class MD5Util {
 			byte[] b = md.digest();
 			bi = new BigInteger(1, b);
 		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+			logger.error("MD5 mart failed NoSuchAlgorithmException", e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("MD5 mart failed IOException", e);
 		}
 		return bi.toString(16);
 	}

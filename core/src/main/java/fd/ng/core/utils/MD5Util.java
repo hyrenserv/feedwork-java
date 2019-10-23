@@ -27,18 +27,18 @@ public class MD5Util {
 	 */
 	public static String md5String(String src) {
 
-		MessageDigest md = null;
-		StringBuffer sb = new StringBuffer(32);
+		StringBuilder sb = new StringBuilder(32);
 		try {
-			md = MessageDigest.getInstance("MD5");
-			byte[] array = md.digest(src.getBytes(CodecUtil.UTF8_STRING));
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			byte[] array = md.digest(src.getBytes(CodecUtil.UTF8_CHARSET));
 			for (int i = 0; i < array.length; i++) {
 				sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).toUpperCase().substring(1, 3));
 			}
+			return sb.toString();
 		} catch (Exception e) {
 			logger.error("MD5 mart failed"+src, e);
+			return null;
 		}
-		return sb.toString();
 	}
 
 	/**
@@ -57,23 +57,21 @@ public class MD5Util {
 	 * @return
 	 */
 	public static String md5File(File file) {
-		BigInteger bi = null;
-		try {
+		try(FileInputStream fis = new FileInputStream(file)) {
 			byte[] buffer = new byte[8192];
-			int len = 0;
+			int len;
 			MessageDigest md = MessageDigest.getInstance("MD5");
-			FileInputStream fis = new FileInputStream(file);
 			while ((len = fis.read(buffer)) != -1) {
 				md.update(buffer, 0, len);
 			}
-			fis.close();
 			byte[] b = md.digest();
-			bi = new BigInteger(1, b);
+			return new BigInteger(1, b).toString(16);
 		} catch (NoSuchAlgorithmException e) {
 			logger.error("MD5 mart failed NoSuchAlgorithmException", e);
+			return null;
 		} catch (IOException e) {
 			logger.error("MD5 mart failed IOException", e);
+			return null;
 		}
-		return bi.toString(16);
 	}
 }

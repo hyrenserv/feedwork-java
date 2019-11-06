@@ -113,6 +113,14 @@ public class ActionResult {
 		return JsonUtil.toObject(data.toString(), type);
 	}
 
+	@JSONField(serialize = false,deserialize = false)
+	public <K,V> Map<K,V> getDataForMap(Class<K> kClass,Class<V> vClass) {
+		if (data == null) return Collections.emptyMap();
+		Type type = new TypeReference<Map<K,V>>(kClass,vClass) {
+		}.getType();
+		return JsonUtil.toObject(data.toString(), type);
+	}
+
 	@Override
 	public String toString() {
 		return "ActionResult{" +

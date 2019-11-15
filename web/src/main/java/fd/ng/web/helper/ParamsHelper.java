@@ -5,7 +5,7 @@ import fd.ng.core.bean.FeedBean;
 import fd.ng.core.exception.BusinessProcessException;
 import fd.ng.core.exception.internal.FrameworkRuntimeException;
 import fd.ng.core.utils.*;
-import fd.ng.web.annotation.*;
+import fd.ng.web.annotation.UploadFile;
 import fd.ng.web.conf.WebinfoConf;
 import fd.ng.web.fileupload.FileItem;
 import fd.ng.web.fileupload.disk.DiskFileItemFactory;
@@ -19,7 +19,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 
 public class ParamsHelper {
 	private static final Logger logger = LogManager.getLogger(ParamsHelper.class.getName());
@@ -76,6 +79,11 @@ public class ParamsHelper {
 				paramsValueObject[i] = RequestUtil.buildBeanFromRequest(request, paramType);
 				continue;
 			}
+
+			/**判断接收的数据类型是不是数组，如果是数组，参数名需要加[]，因为vue默认传入的参数防止name重名数据丢失*/
+			logger.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+paramType);
+			if(paramType.isArray()) reqParamName = reqParamName+"[]";
+
 			boolean required = true;
 			String[] defaultValue = null;
 			/** 【2】 根据当前参数的注解，设置参数名、是否可空、默认值 */
@@ -220,6 +228,7 @@ public class ParamsHelper {
 	}
 	public static String[] getOrNull(final Map<String, String[]> requestParameterMap, final String name) {
 		String[] valueArr = requestParameterMap.get(name);
+		logger.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+requestParameterMap);
 		if (valueArr == null || valueArr.length == 0) return null;
 		else if (valueArr.length == 1 && StringUtil.isEmpty(valueArr[0])) return null;
 		else return valueArr;

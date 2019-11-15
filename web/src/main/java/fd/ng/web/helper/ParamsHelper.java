@@ -80,10 +80,6 @@ public class ParamsHelper {
 				continue;
 			}
 
-			/**判断接收的数据类型是不是数组，如果是数组，参数名需要加[]，因为vue默认传入的参数防止name重名数据丢失*/
-			logger.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+paramType);
-			if(paramType.isArray()) reqParamName = reqParamName+"[]";
-
 			boolean required = true;
 			String[] defaultValue = null;
 			/** 【2】 根据当前参数的注解，设置参数名、是否可空、默认值 */
@@ -98,6 +94,13 @@ public class ParamsHelper {
 			}
 
 			String[] paramValueArr = getOrNull(parameterMap, reqParamName);  // 从 request 中取值
+
+			/**判断接收的数据类型是不是数组，如果是数组，参数名需要加[]，因为vue默认传入的参数防止name重名数据丢失*/
+			if(paramType.isArray() && paramValueArr == null) {
+				reqParamName = reqParamName+"[]";
+				paramValueArr = getOrNull(parameterMap, reqParamName);  // 从 request 中取值
+			}
+
 			if(required) { // 值不允许null。即：没有设置注解、 agreeNull 设置为false、没有设置明确设置 agreeNull
 				if(paramValueArr==null) {
 					sj.add(reqParamName); // 从request中取值为null，则记录下这个错误的参数名
@@ -228,7 +231,6 @@ public class ParamsHelper {
 	}
 	public static String[] getOrNull(final Map<String, String[]> requestParameterMap, final String name) {
 		String[] valueArr = requestParameterMap.get(name);
-		logger.info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"+requestParameterMap);
 		if (valueArr == null || valueArr.length == 0) return null;
 		else if (valueArr.length == 1 && StringUtil.isEmpty(valueArr[0])) return null;
 		else return valueArr;

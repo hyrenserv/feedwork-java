@@ -222,8 +222,8 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 			if(this.dbinfo.isShow_sql_time()) start = System.currentTimeMillis();
 			int[] nums = curPstmt.executeBatch();
 			if(this.showsql&&logger.isInfoEnabled())
-				logger.info("{} ExecB batch sql : [ {} ], params : {}, {} ... ... params.size={}", this.traceId,
-						sql, Arrays.toString(paramsList.get(0)), Arrays.toString(paramsList.get(1)), size);
+				logger.info("{} ExecB batch sql : [ {} ], params : {}... ... params.size={}", this.traceId,
+						sql, Arrays.toString(paramsList.get(0)), size);
 			if(this.dbinfo.isShow_sql_time()) {
 				long end = System.currentTimeMillis();
 				long et = end - start;

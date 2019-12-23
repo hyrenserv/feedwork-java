@@ -1,5 +1,6 @@
 package fd.ng.db.meta;
 
+import fd.ng.core.utils.StringUtil;
 import fd.ng.db.DBException;
 import fd.ng.db.jdbc.DatabaseWrapper;
 import fd.ng.db.jdbc.nature.PagedSqlInfo;
@@ -38,7 +39,7 @@ public class MetaOperator {
 	 */
 	public static List<TableMeta> getTables(final DatabaseWrapper db, final String tableNamePattern) {
 		try (ResultSet rs = db.getConnection().getMetaData().getTables(
-				null, db.ofInfo().getUsername(), tableNamePattern, new String[]{"TABLE", "VIEW"})) {
+				null, "%", tableNamePattern, new String[]{"TABLE", "VIEW"})) {
 			List<TableMeta> result = new ArrayList<>();
 			while(rs.next()) {
 				TableMeta tblMeta = new TableMeta();
@@ -81,7 +82,11 @@ public class MetaOperator {
 		ResultSet rsColumnInfo = null;
 		try {
 			DatabaseMetaData dbMeta = db.getConnection().getMetaData();
-			rsTables = dbMeta.getTables(null, "%", "%", new String[]{"TABLE", "VIEW"});
+			if(!StringUtil.isBlank(tableNamePattern)){
+				rsTables = dbMeta.getTables(null, "%", tableNamePattern, new String[]{"TABLE", "VIEW"});
+			}else {
+				rsTables = dbMeta.getTables(null, "%", "%", new String[]{"TABLE", "VIEW"});
+			}
 			while(rsTables.next()) {
 				TableMeta tblMeta = new TableMeta();
 				final String tableName = rsTables.getString("TABLE_NAME");

@@ -56,6 +56,7 @@ public class RequestUtil {
 			Map<String, String[]> valueMap = new HashMap<>();
 			for (String key : stringMap.keySet()) {
 				Object obj = stringMap.get(key);
+				if (obj == null) continue;
 				valueMap.put(key, JsonUtil.toJsonString(obj));
 			}
 			T paramsValue = buildBeanFromRequest(valueMap, beanClass);

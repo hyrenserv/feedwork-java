@@ -42,6 +42,21 @@ public class JsonUtil {
         throw new AssertionError("No JsonUtil instances for you!");
     }
 
+
+    public static String[] toJsonString(Object obj){
+	    String[] newarray = null;
+	    if(obj instanceof JSONArray){
+		    JSONArray jj = (JSONArray) obj;
+		    newarray = new String[jj.size()];
+		    for (int j = 0; j < jj.size(); j++) {
+			    newarray[j] = String.valueOf(jj.get(j));
+		    }
+	    }else{
+		    newarray = new String[1];
+		    newarray[0] = obj.toString();
+	    }
+	    return newarray;
+    }
     /**
      * 把java对象转成json串。对小数据使用该函数。
      * 如果要出来大文件，需使用 toJsonOnBigData

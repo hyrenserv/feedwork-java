@@ -107,6 +107,21 @@ public class UserManagerAction extends WebappBaseAction {
 		return map;
 	}
 
+	@Param(name = "person", isBean = true,desc = "test", range = "..")
+	@Param(name = "ppp", isBean = true,desc = "test", range = "..")
+	@Param(name = "aa",desc = "test", range = "..")
+	@Param(name = "cc",desc = "test", range = "..")
+	public int beanArry(Person person[],String aa,Person ppp,String[] cc) {
+		List list = new ArrayList();
+		for (int i = 0; i <person.length ; i++) {
+			Map<String, Object> map = new HashMap<>();
+			map.put("person", person[i]);
+			list.add(map);
+		}
+		return person.length;
+		//return list;
+	}
+
 	// ---------------  测试业务异常  ---------------
 
 	public Map<String, String> bizExcetion_OnlyMsg() {

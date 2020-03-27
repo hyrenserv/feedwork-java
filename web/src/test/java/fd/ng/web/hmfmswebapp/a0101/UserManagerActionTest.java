@@ -1,5 +1,6 @@
 package fd.ng.web.hmfmswebapp.a0101;
 
+import com.alibaba.fastjson.JSONObject;
 import fd.ng.core.utils.DateUtil;
 import fd.ng.core.utils.JsonUtil;
 import fd.ng.core.utils.UuidUtil;
@@ -55,10 +56,10 @@ public class UserManagerActionTest extends WebBaseTestCase {
 	@Test
 	public void postBigData() {
 		StringBuilder str = new StringBuilder();
-		for(int i=0; i<5000; i++) {
+		for (int i = 0; i < 5000; i++) {
 			str.append("1234567890");
 		}
-		TestCaseLog.println("post data length="+str.length());
+		TestCaseLog.println("post data length=" + str.length());
 
 		String responseValue = new HttpClient()
 				.addData("name", str.toString())
@@ -120,7 +121,7 @@ public class UserManagerActionTest extends WebBaseTestCase {
 				.getBodyString();
 
 		String ar = JsonUtil.getNodeValue(responseValue, "data");
-		assertThat(ar, allOf( containsString("\"person\":"),
+		assertThat(ar, allOf(containsString("\"person\":"),
 				containsString("\"name\":\"李四\""),
 				containsString("\"age\":99"),
 				containsString("\"sex\":\"男\""),
@@ -135,6 +136,42 @@ public class UserManagerActionTest extends WebBaseTestCase {
 		assertThat(person.getAmt(), is(new BigDecimal("234.99")));
 	}
 
+	@Test
+	public void beanArry() {
+
+		Person[] pa = new Person[2];
+
+		Person p = new Person();
+		p.setName("p-name-lr");
+		p.setAge(99);
+		p.setSex("0-男");
+		p.setFavors(new String[]{"p-fa-xxx", "p-fa-yyy"});
+		p.setAmt(new BigDecimal("33.12"));
+		pa[0] = p;
+		p = new Person();
+		p.setName("p-name-xc");
+		p.setAge(1);
+		p.setSex("女");
+		p.setFavors(new String[]{"p-fa-1", "p-fa-2"});
+		p.setAmt(new BigDecimal("1.1"));
+		pa[1] = p;
+		String s = JSONObject.toJSONString(pa);
+		s = s.replaceAll("amt", "money");
+
+		String responseValue = new HttpClient()
+				.addData("person", s)
+				.addData("aa", "aaaaaaaaaaaaaaaaaaaaa")
+				.addData("name", "李四")
+				.addData("age", 99)
+				.addData("sex", "男")
+				.addData("favors", new String[]{"xxx", "yyy"})
+				.addData("money", "234.99")
+				.addData("cc", new String[]{"name", "sdfsdf"})
+				.post(getActionUrl("beanArry"))
+				.getBodyString();
+		String ar = JsonUtil.getNodeValue(responseValue, "data");
+		assertThat(ar, is("2"));
+	}
 	// ---------------  测试业务异常  ---------------
 
 	@Test
@@ -145,6 +182,7 @@ public class UserManagerActionTest extends WebBaseTestCase {
 		// 因为后台抛出了异常是带有自定义提示消息的，框架会把这个消息返回前端
 		assertThat(responseValue.replace(": ", ":"), containsString("\"message\":\"only msg\","));
 	}
+
 	@Test
 	public void bizExcetion_ResNoArgs() {
 		String responseValue = new HttpClient().post(getActionUrl("bizExcetion_ResNoArgs")).getBodyString();
@@ -152,6 +190,7 @@ public class UserManagerActionTest extends WebBaseTestCase {
 		// 因为后台抛出了异常时，使用的是资源文件中的内容，框架会把这个消息返回前端
 		assertThat(responseValue.replace(": ", ":"), containsString("\"message\":\"User list!\","));
 	}
+
 	@Test
 	public void bizExcetion_ResHasArgs() {
 		String responseValue = new HttpClient().post(getActionUrl("bizExcetion_ResHasArgs")).getBodyString();
@@ -168,6 +207,7 @@ public class UserManagerActionTest extends WebBaseTestCase {
 		// 因为在总控中的异常处理段，再次抛出运行时异常，这就编程了系统错误，且不会以JSON格式返回前端
 		assertThat(responseValue, containsString("HTTP ERROR 500"));
 	}
+
 	@Test
 	public void bizCodeExcetion_OnlyMsg() {
 		String responseValue = new HttpClient().post(getActionUrl("bizCodeExcetion_OnlyMsg")).getBodyString();
@@ -176,6 +216,7 @@ public class UserManagerActionTest extends WebBaseTestCase {
 		// 因为后台抛出了异常是带有自定义提示消息的，框架会把这个消息返回前端
 		assertThat(responseValue.replace(": ", ":"), containsString("\"message\":\"only msg\","));
 	}
+
 	@Test
 	public void bizCodeExcetion_ResNoArgs() {
 		String responseValue = new HttpClient().post(getActionUrl("bizCodeExcetion_ResNoArgs")).getBodyString();
@@ -183,6 +224,7 @@ public class UserManagerActionTest extends WebBaseTestCase {
 		// 因为后台抛出了异常时，使用的是资源文件中的内容，框架会把这个消息返回前端
 		assertThat(responseValue.replace(": ", ":"), containsString("\"message\":\"User list!\","));
 	}
+
 	@Test
 	public void bizCodeExcetion_ResHasArgs() {
 		String responseValue = new HttpClient().post(getActionUrl("bizCodeExcetion_ResHasArgs")).getBodyString();
@@ -199,6 +241,7 @@ public class UserManagerActionTest extends WebBaseTestCase {
 		// 因为后台是对捕获的异常直接包裹后抛出，没有提供自定义消息，所以，框架会统一返回前端： "Business Exception"
 		assertThat(responseValue.replace(": ", ":"), containsString("\"message\":\"Business Exception | "));
 	}
+
 	@Test
 	public void bizSysExcetion_MsgAndEx() {
 		String responseValue = post(getActionUrl("bizSysExcetion_MsgAndEx"));
@@ -206,6 +249,7 @@ public class UserManagerActionTest extends WebBaseTestCase {
 		// 因为后台抛出了异常是带有自定义提示消息的，框架会把这个消息返回前端
 		assertThat(responseValue.replace(": ", ":"), containsString("\"message\":\"MsgAndEx | "));
 	}
+
 	@Test
 	public void bizSysExcetion_MsgAndLogAndEx() {
 		String responseValue = post(getActionUrl("bizSysExcetion_MsgAndLogAndEx"));
@@ -230,7 +274,7 @@ public class UserManagerActionTest extends WebBaseTestCase {
 
 		// 删除上面的用户
 		String url = getActionPath() + "/delUser";
-		responseValue = post( url, new String[][]{ {"name", name} } );
+		responseValue = post(url, new String[][]{{"name", name}});
 		ar = JsonUtil.getNodeValue(responseValue, "data");
 		assertThat(JsonUtil.toObject(ar, boolean.class), is(true));
 	}
@@ -263,7 +307,7 @@ public class UserManagerActionTest extends WebBaseTestCase {
 
 		// 删除上面的用户
 		String url = getActionPath() + "/delUser";
-		responseValue = post( url, new String[][]{ {"name", name} } );
+		responseValue = post(url, new String[][]{{"name", name}});
 		ar = JsonUtil.getNodeValue(responseValue, "data");
 		assertThat(JsonUtil.toObject(ar, boolean.class), is(true));
 	}
@@ -280,7 +324,7 @@ public class UserManagerActionTest extends WebBaseTestCase {
 
 		// 删除上面的用户
 		String url = getActionPath() + "/delUser";
-		responseValue = post( url, new String[][]{ {"name", name} } );
+		responseValue = post(url, new String[][]{{"name", name}});
 		ar = JsonUtil.getNodeValue(responseValue, "data");
 		assertThat(JsonUtil.toObject(ar, boolean.class), is(true));
 	}

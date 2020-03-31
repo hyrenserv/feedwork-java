@@ -16,6 +16,7 @@ public class DateUtil {
 	public static final DateTimeFormatter DATETIME_DEFAULT = DateTimeFormatter.ofPattern("yyyyMMdd HHmmss");
 	public static final DateTimeFormatter DATETIME_ZHCN = DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH点mm分ss秒");
 	public static final DateTimeFormatter DATE_DEFAULT = DateTimeFormatter.ofPattern("yyyyMMdd");
+	public static final DateTimeFormatter DATE_DEFAULTFORM = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	public static final DateTimeFormatter TIME_DEFAULT = DateTimeFormatter.ofPattern("HHmmss");
 	public static final DateTimeFormatter MONTHDAY_DEFAULT = DateTimeFormatter.ofPattern("MMdd");
 
@@ -114,5 +115,17 @@ public class DateUtil {
 	public static LocalTime parseStr2TimeWith6Char(String timeStr) {
 
 		return LocalTime.parse(timeStr, TIME_DEFAULT);
+	}
+	/**
+	 * 计算两个日期相差的天数
+	 * @param startDate 格式：yyyyMMdd
+	 * @param endDate 格式：yyyyMMdd
+	 * @return 返回两日期相差的天数
+	 */
+	public static int dateMargin(String startDate, String endDate) {
+
+		LocalDate d1 = parseStr2DateWith8Char(startDate);
+		LocalDate d2 = parseStr2DateWith8Char(endDate);
+		return (int) (d2.toEpochDay() - d1.toEpochDay());
 	}
 }

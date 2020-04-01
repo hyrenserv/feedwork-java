@@ -16,7 +16,6 @@ public class DateUtil {
 	public static final DateTimeFormatter DATETIME_DEFAULT = DateTimeFormatter.ofPattern("yyyyMMdd HHmmss");
 	public static final DateTimeFormatter DATETIME_ZHCN = DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH点mm分ss秒");
 	public static final DateTimeFormatter DATE_DEFAULT = DateTimeFormatter.ofPattern("yyyyMMdd");
-	public static final DateTimeFormatter DATE_DEFAULTFORM = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	public static final DateTimeFormatter TIME_DEFAULT = DateTimeFormatter.ofPattern("HHmmss");
 	public static final DateTimeFormatter MONTHDAY_DEFAULT = DateTimeFormatter.ofPattern("MMdd");
 
@@ -127,5 +126,48 @@ public class DateUtil {
 		LocalDate d1 = parseStr2DateWith8Char(startDate);
 		LocalDate d2 = parseStr2DateWith8Char(endDate);
 		return (int) (d2.toEpochDay() - d1.toEpochDay());
+	}
+
+	/**
+	 *  根据日期格式化对象验证传入的日期型字符串是否符合规则
+	 *  该对象可调用
+	 * @param dateStr 日期型字符串
+	 * @param dateTimeFormatter jdk1.8 引入的日期格式化对象
+	 * @return 传入的日期型字符串是否符合规则
+	 * @author Mick Yuan
+	 */
+	public static boolean validDateStr(String dateStr, DateTimeFormatter dateTimeFormatter) {
+		try {
+			LocalDate.parse(dateStr,dateTimeFormatter);
+		} catch (Exception e) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * 根据日期格式化字符串验证传入的日期型字符串是否符合规则
+	 *
+	 * @param dateStr 日期型字符串
+	 * @param pattern 日期格式化字符串
+	 * @return 传入的日期型字符串是否符合规则
+	 * @author Mick Yuan
+	 */
+	public static boolean validDateStr(String dateStr, String pattern) {
+		if (StringUtil.isBlank(dateStr)) {
+			return false;
+		}
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(pattern);
+		return validDateStr(dateStr, dateTimeFormatter);
+	}
+
+	/**
+	 * 验证传入的日期型字符串 是否是 yyyyMMdd 格式的
+	 * @param dateStr 日期型字符串
+	 * @return 传入的日期型字符串是否是 yyyyMMdd 格式的
+	 * @author Mick Yuan
+	 */
+	public static boolean validDateStr(String dateStr) {
+		return validDateStr(dateStr, DATE_DEFAULT);
 	}
 }

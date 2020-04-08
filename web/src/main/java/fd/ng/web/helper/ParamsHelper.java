@@ -77,11 +77,7 @@ public class ParamsHelper {
 			 */
 			if (paramValue.isBean && paramType.isArray()) {
 				Class<?> componentType = paramType.getComponentType();
-				//Object[] paramsValueArray = new Object[paramValueMap.size()];
-				//for (int j = 0; j < paramValueMap.size() ; j++) {
 				paramsValueObject[i] = RequestUtil.buildBeanFrom(request, componentType,reqParamName);
-				//}
-				//paramsValueObject[i] = paramsValueArray;
 				continue;
 			}
 

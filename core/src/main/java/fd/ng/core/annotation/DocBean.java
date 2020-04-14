@@ -1,10 +1,11 @@
 package fd.ng.core.annotation;
 
+
 import java.lang.annotation.*;
 
 @Inherited
 @Target({ElementType.METHOD,ElementType.FIELD,ElementType.PARAMETER})
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface DocBean {
 	String name();//实体属性名称
 	String value();// 实体属性中午描述

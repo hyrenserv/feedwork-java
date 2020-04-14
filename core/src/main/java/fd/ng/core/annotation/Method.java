@@ -6,7 +6,7 @@ import java.lang.annotation.*;
 
 @Inherited
 @Target({ElementType.METHOD, ElementType.TYPE})
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Method {
 	String desc();//类描述
 	String logicStep();//用 1. 2. 3. 的方式，描述方法的处理逻辑

@@ -4,7 +4,7 @@ import java.lang.annotation.*;
 
 @Inherited
 @Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Return {
 	String desc();//返回数据描述
 	String range();//返回值的范围

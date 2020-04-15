@@ -175,6 +175,16 @@ public class UserManagerActionTest extends WebBaseTestCase {
 	// ---------------  测试业务异常  ---------------
 
 	@Test
+	public void arry() {
+
+		String responseValue = new HttpClient()
+				.addData("cc", new String[]{"name", "age"})
+				.post(getActionUrl("arry"))
+				.getBodyString();
+		String ar = JsonUtil.getNodeValue(responseValue, "data");
+	}
+
+	@Test
 	public void bizExcetion_OnlyMsg() {
 		String responseValue = new HttpClient().post(getActionUrl("bizExcetion_OnlyMsg")).getBodyString();
 

@@ -119,6 +119,11 @@ public class UserManagerAction extends WebappBaseAction {
 		//return list;
 	}
 
+	@Param(name = "cc",desc = "test", range = "..")
+	public int arry(String[] cc) {
+		return cc.length;
+	}
+
 	// ---------------  测试业务异常  ---------------
 
 	public Map<String, String> bizExcetion_OnlyMsg() {

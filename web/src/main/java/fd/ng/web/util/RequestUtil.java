@@ -116,6 +116,10 @@ public class RequestUtil {
 				}
 
 				String[] valArr = parameterMap.get(reqFieldName);   // 用当前属性名字到request中取值
+				if (propType.isArray() && valArr == null) {
+					reqFieldName = reqFieldName + "[]";
+					valArr = parameterMap.get(reqFieldName);   // 用当前属性名字到request中取值
+				}
 				if (valArr == null) continue; // 该属性不在 request 中
 
 				try {

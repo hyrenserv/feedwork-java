@@ -1,5 +1,7 @@
 package fd.ng.db.meta;
 
+import fd.ng.db.conf.ConnWay;
+import fd.ng.db.conf.DbinfosConf;
 import fd.ng.db.conf.Dbtype;
 import fd.ng.db.jdbc.DatabaseWrapper;
 import org.junit.Test;
@@ -97,5 +99,21 @@ public class MetaOperatorTest {
 			db.ExecDDL("drop table " + testTableName);
 		}
 	}
-
+	@Test
+	public  void getMeta(){
+		DbinfosConf.Dbinfo dbInfo = new DbinfosConf.Dbinfo();
+		dbInfo.setName(DbinfosConf.DEFAULT_DBNAME);
+		dbInfo.setDriver("oracle.jdbc.OracleDriver");
+		dbInfo.setUrl("jdbc:oracle:thin:@47.103.83.1:1521:HYSHF");
+		dbInfo.setUsername("HYSHF");
+		dbInfo.setPassword("hyshf");
+		dbInfo.setWay(ConnWay.JDBC);
+		//2、获取数据库类型
+		Dbtype dbType = Dbtype.ORACLE;
+		dbInfo.setDbtype(dbType);
+		dbInfo.setShow_conn_time(true);
+		dbInfo.setShow_sql(true);
+		DatabaseWrapper db = new DatabaseWrapper.Builder().dbconf(dbInfo).create();
+		List<TableMeta> tableMetas = MetaOperator.getTablesWithColumns(db);
+	}
 }

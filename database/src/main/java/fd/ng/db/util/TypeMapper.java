@@ -26,6 +26,7 @@ public class TypeMapper {
 		_typeMapperBox.put(Types.NVARCHAR, String.class);
 		_typeMapperBox.put(Types.LONGVARCHAR, String.class);
 		_typeMapperBox.put(Types.CHAR, String.class); // maybe char[] ?
+		_typeMapperBox.put(Types.CLOB, String.class); // maybe char[] ?
 
 		_typeMapperBox.put(Types.BIGINT, Long.class);
 
@@ -53,6 +54,8 @@ public class TypeMapper {
 
 		_typeMapperBox.put(Types.LONGVARBINARY, byte[].class);
 		_typeMapperBox.put(Types.BINARY, byte[].class);
+		_typeMapperBox.put(Types.BLOB, byte[].class);
+		_typeMapperBox.put(Types.VARBINARY, byte[].class);
 
 		_typeMapper = Collections.unmodifiableMap(_typeMapperBox);
 	}

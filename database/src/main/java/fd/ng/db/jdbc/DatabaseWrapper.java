@@ -525,6 +525,9 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 			// 对于pgsql， 第2个参数导致无法获取到表
 			if(dbinfo.getDbtype()==Dbtype.MYSQL) // 目前只测试 mysql 可用 schemaPattern， pgsql不能用 schemaPattern
 				rsThis = dbMeta.getTables(null, this.dbinfo.getUsername(), tableName, null);
+			else if(dbinfo.getDbtype()==Dbtype.ORACLE)
+				rsThis = dbMeta.getTables(null, this.dbinfo.getUsername().toUpperCase(),
+						tableName.toUpperCase(), new String[] { "TABLE" });
 			else
 				rsThis = dbMeta.getTables(null, null, tableName, null);
 			if(rsThis.next()) return true;
@@ -533,7 +536,7 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 //				rsThis = queryGetResultSet("select count(1) from " +tableName + " where 1=2");
 //				if(rsThis.next()) return true;
 //				else
-					return false;
+				return false;
 			}
 		} catch (SQLException e) {
 			throw new DBException(this.traceId, "ExistCheck table '"+tableName+"' failed", e);

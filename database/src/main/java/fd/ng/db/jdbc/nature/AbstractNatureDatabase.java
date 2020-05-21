@@ -4,7 +4,8 @@ import fd.ng.core.exception.internal.FrameworkRuntimeException;
 
 public abstract class AbstractNatureDatabase {
 	static final String ForUpdate = " for update";
-
+	//拼接sql字段的分隔符
+	static final String COLUMN_SEPARATOR = ",";
 	/**
 	 * 根据原始 sql ，生成用于计算查询数据量的 count sql。
 	 * 本方法，理论上，适用于所有数据库

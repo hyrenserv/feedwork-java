@@ -2,6 +2,8 @@ package fd.ng.db.jdbc.nature;
 
 import fd.ng.core.exception.internal.FrameworkRuntimeException;
 
+import java.util.Set;
+
 public class DB2V2 extends AbstractNatureDatabase {
 	private DB2V2() {}
 
@@ -24,5 +26,14 @@ public class DB2V2 extends AbstractNatureDatabase {
 		}
 		pagedSqlInfo.setSql(_pagedSql.toString());
 		return pagedSqlInfo;
+	}
+
+	public static String toKeyLabelSql(String tableName, Set<String> columnName) {
+		StringBuilder columnSB = new StringBuilder();
+		for (String s : columnName) {
+			columnSB.append(s).append(COLUMN_SEPARATOR);
+		}
+		String column = columnSB.toString().substring(0, columnSB.toString().length() - 1);
+		return "select " + column + " from " + tableName;
 	}
 }

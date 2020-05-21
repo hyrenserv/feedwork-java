@@ -1,11 +1,11 @@
 package fd.ng.db.jdbc;
 
+import fd.ng.db.conf.Dbtype;
+import fd.ng.db.jdbc.nature.PagedSqlInfo;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Ignore
 public class VarArgsTest {
@@ -17,6 +17,18 @@ public class VarArgsTest {
 		method("sql2",4545);
 
 		hello2("sdf", 3254);
+	}
+
+	@Test
+	public void ofKeyLableSql() {
+		//DatabaseWrapper db = new DatabaseWrapper();
+		Dbtype oracle = Dbtype.HIVE;
+		Set<String> cc = new HashSet<>();
+		cc.add("sdfs");
+		cc.add("bb");
+		String cccc = oracle.ofKeyLableSql("cccc", cc);
+		PagedSqlInfo pagedSqlInfo = oracle.ofPagedSql("select * from aaa", 1, 222);
+		String sql = pagedSqlInfo.getSql();
 	}
 
 	public <T> Optional<T> method(Class<T> classTypeOfBean, String sql, Object... params) {

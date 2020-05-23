@@ -94,7 +94,7 @@ abstract class AbstractDatabaseWrapper implements AutoCloseable {
 		if (param == null) {
 			// 不论怎样，VARCHAR 都能适应各种JDBC驱动，且不管该列的真实类型是什么。
 			// Types.NULL 和 Types.OTHER 对Oracle驱动好像有问题？
-			pstmt.setNull(i, Types.VARCHAR);
+			pstmt.setNull(i, Types.NULL);
 		} else {
 			pstmt.setObject(i, param);
 		}

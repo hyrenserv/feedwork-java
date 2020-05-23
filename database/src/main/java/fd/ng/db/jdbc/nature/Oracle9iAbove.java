@@ -26,9 +26,9 @@ public class Oracle9iAbove extends AbstractNatureDatabase {
 		}
 		_pagedSql.append(sql);
 		if(orginBegin>1) {
-			_pagedSql.append(" ) row_ where rownum <= ?) where rownum_ > ?");
+			_pagedSql.append(" ) row_ where rownum <= ?) where rownum_ >= ?");//因为出入的值是从1开，这里需要包含当前数据
 			pagedSqlInfo.setPageNo1(orginEnd);
-			pagedSqlInfo.setPageNo1(orginBegin);
+			pagedSqlInfo.setPageNo2(orginBegin);
 		}
 		else {
 			_pagedSql.append(" ) where rownum <= ?");

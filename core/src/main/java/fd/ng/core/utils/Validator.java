@@ -5,6 +5,16 @@ import java.util.Map;
 public class Validator {
 	public Validator() { throw new AssertionError("No Validator instances for you!"); }
 
+	public static CharSequence notBlank(final CharSequence cs, String message){
+		if(StringUtil.isBlank(cs)){
+			throw new IllegalArgumentException(message);
+		}
+		return cs;
+	}
+	public static CharSequence notBlank(final CharSequence cs){
+		notBlank(cs,"[validate failed] - the argument is required; it must not null,not a space");
+		return cs;
+	}
 	public static <T> T notNull(T object) {
 		return notNull(object, "[validate failed] - the argument is required; it must not null!");
 	}

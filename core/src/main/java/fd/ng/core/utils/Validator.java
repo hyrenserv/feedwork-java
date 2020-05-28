@@ -1,5 +1,6 @@
 package fd.ng.core.utils;
 
+import java.util.Collection;
 import java.util.Map;
 
 public class Validator {
@@ -23,6 +24,17 @@ public class Validator {
 			throw new IllegalArgumentException(message);
 		return object;
 	}
+
+	public static <E> Collection<E> notEmpty(Collection<E> c) {
+		return notEmpty(c, "[validate failed] - the argument must not null or empty!");
+	}
+
+	public static <E> Collection<E> notEmpty(Collection<E> c, String message) {
+		if (c == null || c.isEmpty())
+			throw new IllegalArgumentException(message);
+		return c;
+	}
+
 	public static <K, V> Map<K, V> notEmpty(Map<K, V> object) {
 		return notEmpty(object, "[validate failed] - the argument must not null or empty!");
 	}

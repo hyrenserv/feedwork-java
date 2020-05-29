@@ -22,13 +22,14 @@ public class VarArgsTest {
 	@Test
 	public void ofKeyLableSql() {
 		//DatabaseWrapper db = new DatabaseWrapper();
-		Dbtype oracle = Dbtype.HIVE;
+		Dbtype oracle = Dbtype.POSTGRESQL;
 		Set<String> cc = new HashSet<>();
 		cc.add("sdfs");
 		cc.add("bb");
-		String cccc = oracle.ofKeyLableSql("cccc", cc);
+		String cccc = oracle.ofKeyLableSql("cccc", cc,"hyshf");
 		PagedSqlInfo pagedSqlInfo = oracle.ofPagedSql("select * from aaa", 1, 222);
 		String sql = pagedSqlInfo.getSql();
+		System.out.println(cccc);
 	}
 
 	public <T> Optional<T> method(Class<T> classTypeOfBean, String sql, Object... params) {

@@ -57,6 +57,11 @@ public class TypeMapper {
 		_typeMapperBox.put(Types.BLOB, byte[].class);
 		_typeMapperBox.put(Types.VARBINARY, byte[].class);
 
+		//TODO 这里需要验证
+		_typeMapperBox.put(Types.NCLOB, String.class);
+		_typeMapperBox.put(Types.SQLXML,String.class);
+		_typeMapperBox.put(Types.ROWID,String.class);
+
 		_typeMapper = Collections.unmodifiableMap(_typeMapperBox);
 	}
 

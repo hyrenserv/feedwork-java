@@ -4,6 +4,7 @@ import fd.ng.db.conf.ConnWay;
 import fd.ng.db.conf.DbinfosConf;
 import fd.ng.db.conf.Dbtype;
 import fd.ng.db.jdbc.DatabaseWrapper;
+import fd.ng.test.junit.TestCaseLog;
 import org.junit.Test;
 
 import java.sql.Types;
@@ -104,16 +105,45 @@ public class MetaOperatorTest {
 		DbinfosConf.Dbinfo dbInfo = new DbinfosConf.Dbinfo();
 		dbInfo.setName(DbinfosConf.DEFAULT_DBNAME);
 		dbInfo.setDriver("oracle.jdbc.OracleDriver");
-		dbInfo.setUrl("jdbc:oracle:thin:@47.103.83.1:1521:HYSHF");
-		dbInfo.setUsername("HYSHF");
-		dbInfo.setPassword("hyshf");
+		dbInfo.setUrl("jdbc:oracle:thin:@47.103.83.1:1521:hyshf");
+		dbInfo.setUsername("xxx");
+		dbInfo.setPassword("xxx");
 		dbInfo.setWay(ConnWay.JDBC);
 		//2、获取数据库类型
 		Dbtype dbType = Dbtype.ORACLE;
 		dbInfo.setDbtype(dbType);
 		dbInfo.setShow_conn_time(true);
 		dbInfo.setShow_sql(true);
+
+		dbInfo.setDataBaseName("hyshf");
+
+
 		DatabaseWrapper db = new DatabaseWrapper.Builder().dbconf(dbInfo).create();
+		System.out.println(db.getDatabaseName());
+
 		List<TableMeta> tableMetas = MetaOperator.getTablesWithColumns(db);
+		//assertThat(tableMetas.size(), is(0));
+		TestCaseLog.println(tableMetas.toString());
+	}
+
+	@Test
+	public  void getMetaPgsql(){
+		DbinfosConf.Dbinfo dbInfo = new DbinfosConf.Dbinfo();
+		dbInfo.setName(DbinfosConf.DEFAULT_DBNAME);
+		dbInfo.setDriver("org.postgresql.Driver");
+		dbInfo.setUrl("jdbc:postgresql://10.71.4.57:31001/hrsdxg");
+		dbInfo.setUsername("hrsdxg");
+		dbInfo.setPassword("hrsdxg");
+		dbInfo.setWay(ConnWay.JDBC);
+		//2、获取数据库类型
+		Dbtype dbType = Dbtype.POSTGRESQL;
+		dbInfo.setDbtype(dbType);
+		dbInfo.setShow_conn_time(true);
+		dbInfo.setShow_sql(true);
+
+		DatabaseWrapper db = new DatabaseWrapper.Builder().dbconf(dbInfo).create();
+
+		List<TableMeta> tableMetas = MetaOperator.getTablesWithColumns(db);
+		TestCaseLog.println(tableMetas.toString());
 	}
 }

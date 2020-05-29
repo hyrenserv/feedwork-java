@@ -1,8 +1,13 @@
 package fd.ng.db.conf;
 
 import fd.ng.core.exception.internal.FrameworkRuntimeException;
+import fd.ng.core.utils.StringUtil;
+import fd.ng.db.jdbc.DatabaseWrapper;
 import fd.ng.db.jdbc.nature.*;
 
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Set;
 
 public enum Dbtype {
@@ -13,8 +18,13 @@ public enum Dbtype {
 		}
 
 		@Override
-		public String ofKeyLableSql(String tableName, Set<String> columnName) {
-			return Oracle9iAbove.toKeyLabelSql(tableName, columnName);
+		public String ofKeyLableSql(String tableName, Set<String> columnName,String dataBaseName) {
+			return Oracle9iAbove.toKeyLabelSql(tableName, columnName,dataBaseName);
+		}
+
+		@Override
+		public String getDatabase(final DatabaseWrapper db, DatabaseMetaData dbMeta){
+			return Oracle9iAbove.getDatabase(db, dbMeta);
 		}
 	},
 	POSTGRESQL("postgresql") {
@@ -23,7 +33,7 @@ public enum Dbtype {
 			return PostgreSQL.toPagedSql(orginSql, orginBegin, orginEnd);
 		}
 		@Override
-		public String ofKeyLableSql(String tableName, Set<String> columnName) {
+		public String ofKeyLableSql(String tableName, Set<String> columnName,String dataBaseName) {
 			return PostgreSQL.toKeyLabelSql(tableName, columnName);
 		}
 
@@ -39,7 +49,7 @@ public enum Dbtype {
 		}
 
 		@Override
-		public String ofKeyLableSql(String tableName, Set<String> columnName) {
+		public String ofKeyLableSql(String tableName, Set<String> columnName,String dataBaseName) {
 			return MySQL.toKeyLabelSql(tableName, columnName);
 		}
 	},
@@ -49,8 +59,9 @@ public enum Dbtype {
 		public PagedSqlInfo ofPagedSql(final String orginSql, final int orginBegin, final int orginEnd) {
 			return fd.ng.db.jdbc.nature.DB2V1.toPagedSql(orginSql, orginBegin, orginEnd);
 		}
+
 		@Override
-		public String ofKeyLableSql(String tableName, Set<String> columnName) {
+		public String ofKeyLableSql(String tableName, Set<String> columnName,String dataBaseName) {
 			return fd.ng.db.jdbc.nature.DB2V1.toKeyLabelSql(tableName, columnName);
 		}
 	},
@@ -60,7 +71,7 @@ public enum Dbtype {
 			return fd.ng.db.jdbc.nature.DB2V2.toPagedSql(orginSql, orginBegin, orginEnd);
 		}
 		@Override
-		public String ofKeyLableSql(String tableName, Set<String> columnName) {
+		public String ofKeyLableSql(String tableName, Set<String> columnName,String dataBaseName) {
 			return fd.ng.db.jdbc.nature.DB2V2.toKeyLabelSql(tableName, columnName);
 		}
 	},
@@ -70,7 +81,7 @@ public enum Dbtype {
 			return fd.ng.db.jdbc.nature.HIVE.toPagedSql(orginSql, orginBegin, orginEnd);
 		}
 		@Override
-		public String ofKeyLableSql(String tableName, Set<String> columnName) {
+		public String ofKeyLableSql(String tableName, Set<String> columnName,String dataBaseName) {
 			return fd.ng.db.jdbc.nature.HIVE.toKeyLabelSql(tableName, columnName);
 		}
 	},
@@ -98,9 +109,15 @@ public enum Dbtype {
 	public PagedSqlInfo ofPagedSql(String orginSql, final int orginBegin, final int orginEnd) {
 		throw new FrameworkRuntimeException("You must impl this method for " + desc);
 	}
-	public String ofKeyLableSql(String tableName, Set<String> columnName) {
+	public String ofKeyLableSql(String tableName, Set<String> columnName,String dataBaseName) {
 		throw new FrameworkRuntimeException("You must impl this method for " + desc);
 	}
+
+	public String getDatabase(final DatabaseWrapper db, DatabaseMetaData dbMeta){
+		//throw new FrameworkRuntimeException("You must impl this method for " + desc);
+		return "%";
+	}
+
 	/**
 	 * 根据原始 sql ，生成用于计算查询数据量的 count sql。
 	 *

@@ -283,6 +283,16 @@ public class DbinfosConf {
 		private String password;
 		private boolean autoCommit = true;
 
+		public String getDataBaseName() {
+			return dataBaseName;
+		}
+
+		public void setDataBaseName(String dataBaseName) {
+			this.dataBaseName = dataBaseName;
+		}
+
+		private String dataBaseName = null;//设置查詢數據庫的名稱，oracle設置表空间
+
 		public boolean autoCommit() {
 			return autoCommit;
 		}

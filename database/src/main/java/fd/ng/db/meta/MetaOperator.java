@@ -89,22 +89,13 @@ public class MetaOperator {
 		try {
 			DatabaseMetaData dbMeta = db.getConnection().getMetaData();
 			String[] type = {"TABLE", "VIEW"};
-			String schemaPattern = "%";// meta.getUserName();// 数据库的用户
 
-			String userName = dbMeta.getUserName();
-			if (db.getDbtype() == Dbtype.ORACLE) {
-				schemaPattern = userName;
-				if (null != schemaPattern) schemaPattern = schemaPattern.toUpperCase();
-			} else if (db.getDbtype() == Dbtype.MYSQL) {
-				schemaPattern = userName;
-			} else if (db.getDbtype() == Dbtype.DB2V1 || db.getDbtype() == Dbtype.DB2V2) {
-				schemaPattern = "jence_user";
-			}
+			String database = db.getDbtype().getDatabase(db, dbMeta);
 
 			if (!StringUtil.isBlank(tableNamePattern)) {
-				rsTables = dbMeta.getTables(null, schemaPattern, tableNamePattern, type);
+				rsTables = dbMeta.getTables(null, database, tableNamePattern, type);
 			} else {
-				rsTables = dbMeta.getTables(null, schemaPattern, "%", type);
+				rsTables = dbMeta.getTables(null, database, "%", type);
 			}
 			while (rsTables.next()) {
 				TableMeta tblMeta = new TableMeta();
@@ -123,7 +114,7 @@ public class MetaOperator {
 				}
 				rsPK.close();
 
-				rsColumnInfo = dbMeta.getColumns(null, "%", tableName, "%");
+				rsColumnInfo = dbMeta.getColumns(null, database, tableName, "%");
 				fillColumnMeta(db, tblMeta, rsColumnInfo);
 				rsColumnInfo.close();
 

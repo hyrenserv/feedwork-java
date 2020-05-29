@@ -1,7 +1,10 @@
 package fd.ng.db.jdbc.nature;
 
 import fd.ng.core.exception.internal.FrameworkRuntimeException;
+import fd.ng.db.jdbc.DatabaseWrapper;
 
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.util.Set;
 
 public class MySQL extends AbstractNatureDatabase {
@@ -32,4 +35,9 @@ public class MySQL extends AbstractNatureDatabase {
 		String column = columnSB.toString().substring(0, columnSB.toString().length() - 1);
 		return "select " + column + " from " + MYSQL_ESCAPES + tableName + MYSQL_ESCAPES;
 	}
+
+	public static String getDatabase(final DatabaseWrapper db, DatabaseMetaData dbMeta) throws SQLException {
+		return dbMeta.getUserName();
+	}
+
 }

@@ -1,14 +1,19 @@
 package fd.ng.db.jdbc.nature;
 
 import fd.ng.core.exception.internal.FrameworkRuntimeException;
+import fd.ng.core.utils.StringUtil;
+import fd.ng.db.jdbc.DatabaseWrapper;
 
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Set;
 
 public class Oracle9iAbove extends AbstractNatureDatabase {
 	private Oracle9iAbove(){}
 
 	public static PagedSqlInfo toPagedSql(String sql, int orginBegin, int orginEnd) {
-		if(orginBegin<1) throw new FrameworkRuntimeException("page begin must greater than 0");
+		if (orginBegin < 1) throw new FrameworkRuntimeException("page begin must greater than 0");
 		PagedSqlInfo pagedSqlInfo = new PagedSqlInfo();
 
 		sql = sql.trim();
@@ -42,12 +47,37 @@ public class Oracle9iAbove extends AbstractNatureDatabase {
 		return pagedSqlInfo;
 	}
 
-	public static String toKeyLabelSql(String tableName, Set<String> columnName) {
+	public static String toKeyLabelSql(String tableName, Set<String> columnName,String databaseName) {
 		StringBuilder columnSB = new StringBuilder();
 		for (String s : columnName) {
 			columnSB.append(s).append(COLUMN_SEPARATOR);
 		}
 		String column = columnSB.toString().substring(0, columnSB.toString().length() - 1);
+		if(!StringUtil.isEmpty(databaseName)){
+			tableName = databaseName+"."+tableName;
+		}
 		return "select " + column + " from " + tableName;
+	}
+
+	public static String getDatabase(final DatabaseWrapper db,DatabaseMetaData dbMeta){
+		return db.getDatabaseName().toUpperCase();
+		/*ResultSet rsTables = null;
+		if (!StringUtil.isBlank(db.getetTablespaceName())) {
+			String sql = "select concat(concat(TABLESPACE_NAME,'.'),TABLE_NAME) table_name,'' TABLE_TYPE,'' TABLE_CAT,'' TABLE_SCHEM,''REMARKS " +
+					"from all_tables where TABLESPACE_NAME= '" + db.getetTablespaceName().toUpperCase() + "'";
+			if (!StringUtil.isBlank(tableNamePattern)) {
+				sql = sql + " and table_name = '" + tableNamePattern + "'";
+			}
+			rsTables = db.queryGetResultSet(sql);
+
+		} else {
+			DatabaseMetaData dbMeta = db.getConnection().getMetaData();
+			if (!StringUtil.isBlank(tableNamePattern)) {
+				rsTables = dbMeta.getTables(null, "%", tableNamePattern, type);
+			} else {
+				rsTables = dbMeta.getTables(null, db.getetTablespaceName(), "%", type);
+			}
+		}
+		return rsTables;*/
 	}
 }

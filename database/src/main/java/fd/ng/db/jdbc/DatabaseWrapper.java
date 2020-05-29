@@ -116,6 +116,7 @@ public class DatabaseWrapper extends AbstractDatabaseWrapper {
 		return this.conn;
 	}
 	public String getName() { return this.dbinfo.getName(); }
+	public String getDatabaseName() { return this.dbinfo.getDataBaseName(); }
 	public String getID() { return this.id; }
 	public Dbtype getDbtype() { return this.dbinfo.getDbtype(); }
 	public DbinfosConf.Dbinfo ofInfo() { return this.dbinfo; }

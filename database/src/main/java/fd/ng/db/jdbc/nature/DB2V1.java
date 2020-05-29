@@ -1,7 +1,9 @@
 package fd.ng.db.jdbc.nature;
 
 import fd.ng.core.exception.internal.FrameworkRuntimeException;
+import fd.ng.db.jdbc.DatabaseWrapper;
 
+import java.sql.DatabaseMetaData;
 import java.util.Set;
 
 public class DB2V1 extends AbstractNatureDatabase {
@@ -36,5 +38,9 @@ public class DB2V1 extends AbstractNatureDatabase {
 		}
 		String column = columnSB.toString().substring(0, columnSB.toString().length() - 1);
 		return "select " + column + " from " + tableName;
+	}
+
+	public String getDatabase(final DatabaseWrapper db, DatabaseMetaData dbMeta) {
+		return "jence_user";
 	}
 }

@@ -89,7 +89,7 @@ public class DbinfosConf {
 					int maxPoolSize = dbconf.getInt("maxPoolSize", 5);
 					if (DEFAULT_DBNAME.equals(name)) { // 如果是默认连接，并且没有设置最大或最小，那么分别设置为10和20
 						if (!dbconf.exist("minPoolSize")) minPoolSize = 10;
-						if (!dbconf.exist("maxPoolSize")) minPoolSize = 20;
+						if (!dbconf.exist("maxPoolSize")) maxPoolSize = 20;
 					}
 					dbconfObject.setMinPoolSize(minPoolSize);
 					dbconfObject.setMaxPoolSize(maxPoolSize);
